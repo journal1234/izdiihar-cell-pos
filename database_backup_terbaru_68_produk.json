@@ -1,0 +1,596 @@
+{
+  "debts": [
+    {
+      "id": "dbt_1791380346385",
+      "customerName": "Ustadz Ardi",
+      "phone": "0853-4069-6523",
+      "itemsDescription": "Token 100 k",
+      "totalAmount": 105000,
+      "paidAmount": 0,
+      "status": "Belum Lunas",
+      "createdAt": "2026-10-07T13:39:06.385Z",
+      "dueDateNotes": "Tanggal 1"
+    }
+  ],
+  "theme": "light",
+  "users": [
+    {
+      "id": "usr_admin",
+      "pin": "2805",
+      "name": "Pemilik Konter",
+      "role": "admin"
+    },
+    {
+      "id": "usr_pegawai",
+      "pin": "0000",
+      "name": "Kasir Shift 1",
+      "role": "pegawai"
+    },
+    {
+      "id": "usr_pegawai_1791114534965",
+      "pin": "1111",
+      "name": "Kasir Shift 2",
+      "role": "pegawai"
+    }
+  ],
+  "drawer": {
+    "notes": "",
+    "isOpen": false,
+    "openedAt": null,
+    "openedBy": null,
+    "startingCash": 0
+  },
+  "products": [
+    {
+      "id": "prd_1791379979912",
+      "cost": 8500,
+      "name": "Parfum 10 K",
+      "price": 10000,
+      "stock": 24,
+      "category": "Parfum"
+    },
+    {
+      "id": "prd_1791379946153",
+      "cost": 3500,
+      "name": "Parfum 5 K",
+      "price": 5000,
+      "stock": 32,
+      "category": "Parfum"
+    },
+    {
+      "id": "prd_1791375242791",
+      "cost": 15000,
+      "name": "Kabel Cas Tipe IP  Welcome",
+      "price": 20000,
+      "stock": 26,
+      "category": "Welcome"
+    },
+    {
+      "id": "prd_1791375140071",
+      "cost": 12600,
+      "name": "Kabel Cas Tipe M  Welcome",
+      "price": 20000,
+      "stock": 27,
+      "category": "Welcome"
+    },
+    {
+      "id": "prd_1791374952863",
+      "cost": 14000,
+      "name": "Kabel Cas Tipe C Welcome",
+      "price": 20000,
+      "stock": 4,
+      "category": "Welcome"
+    },
+    {
+      "id": "prd_1791374849479",
+      "cost": 13500,
+      "name": "Batok Cas Welcome",
+      "price": 25000,
+      "stock": 27,
+      "category": "Welcome"
+    },
+    {
+      "id": "prd_1791374735599",
+      "cost": 20000,
+      "name": "Kartu Smart 3 Gb / 28 H",
+      "price": 30000,
+      "stock": 8,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791374638087",
+      "cost": 38500,
+      "name": "Indosat 10 Gb / 28 H",
+      "price": 42000,
+      "stock": 1,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791374602318",
+      "cost": 65500,
+      "name": "Indosat 30 Gb / 28 H",
+      "price": 70000,
+      "stock": 2,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791374547783",
+      "cost": 29600,
+      "name": "Indosat 22 Gb / 7 H",
+      "price": 32000,
+      "stock": 10,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791374517150",
+      "cost": 24100,
+      "name": "Indosat 13 Gb / 7 H",
+      "price": 27000,
+      "stock": 6,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791374450615",
+      "cost": 35100,
+      "name": "Indosat 7 Gb / 28 H",
+      "price": 38000,
+      "stock": 3,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791374282079",
+      "cost": 17600,
+      "name": "Indosat 8 GB / 5 H",
+      "price": 20000,
+      "stock": 8,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791374229071",
+      "cost": 11000,
+      "name": "Indosat 9 Gb / 2 H",
+      "price": 13000,
+      "stock": 18,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791374174951",
+      "cost": 8600,
+      "name": "Indosat 7 Gb / 1 H",
+      "price": 10000,
+      "stock": 4,
+      "category": "INDOSAT"
+    },
+    {
+      "id": "prd_1791373965990",
+      "cost": 18600,
+      "name": "TRI 7 GB / 5 H",
+      "price": 20000,
+      "stock": 3,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373919127",
+      "cost": 35100,
+      "name": "TRI 7 GB / 28 H",
+      "price": 38000,
+      "stock": 6,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373863782",
+      "cost": 94500,
+      "name": "TRI 65 GB / 28 H",
+      "price": 100000,
+      "stock": 1,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373828438",
+      "cost": 13600,
+      "name": "TRI 6 GB / 3 H",
+      "price": 16000,
+      "stock": 6,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373797519",
+      "cost": 77100,
+      "name": "TRI 36 GB / 28 H",
+      "price": 80000,
+      "stock": 1,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373764038",
+      "cost": 24100,
+      "name": "TRI 15 GB / 7 H",
+      "price": 27000,
+      "stock": 7,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373719183",
+      "cost": 48100,
+      "name": "TRI 15 GB / 28 H",
+      "price": 50000,
+      "stock": 3,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373668750",
+      "cost": 21100,
+      "name": "TRI 12 GB / 5 H",
+      "price": 25000,
+      "stock": 6,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373605294",
+      "cost": 18600,
+      "name": "TRI 10 GB / 5 H",
+      "price": 22000,
+      "stock": 3,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373568574",
+      "cost": 11600,
+      "name": "TRI 10 GB / 2 H",
+      "price": 13000,
+      "stock": 7,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373533438",
+      "cost": 8600,
+      "name": "TRI 10 GB / 1 H",
+      "price": 10000,
+      "stock": 8,
+      "category": "TRI"
+    },
+    {
+      "id": "prd_1791373476614",
+      "cost": 19000,
+      "name": "Kartu Axis 3 Gb / 28 H",
+      "price": 30000,
+      "stock": 4,
+      "category": "AXIS"
+    },
+    {
+      "id": "prd_1791373415406",
+      "cost": 14500,
+      "name": "AXIS 6 GB / 5 H",
+      "price": 16000,
+      "stock": 6,
+      "category": "AXIS"
+    },
+    {
+      "id": "prd_1791373382806",
+      "cost": 12500,
+      "name": "AXIS 6 GB / 3 H",
+      "price": 15000,
+      "stock": 8,
+      "category": "AXIS"
+    },
+    {
+      "id": "prd_1791373348495",
+      "cost": 10500,
+      "name": "AXIS 7 GB / 2 H",
+      "price": 13000,
+      "stock": 16,
+      "category": "AXIS"
+    },
+    {
+      "id": "prd_1791373299110",
+      "cost": 23500,
+      "name": "AXIS 13 GB / 7 H",
+      "price": 27000,
+      "stock": 5,
+      "category": "AXIS"
+    },
+    {
+      "id": "prd_1791373259686",
+      "cost": 17550,
+      "name": "AXIS 10 GB / 5 H",
+      "price": 20000,
+      "stock": 6,
+      "category": "AXIS"
+    },
+    {
+      "id": "prd_1791373217222",
+      "cost": 38650,
+      "name": "AXIS 10 GB / 28 H",
+      "price": 42000,
+      "stock": 1,
+      "category": "AXIS"
+    },
+    {
+      "id": "prd_1791373100958",
+      "cost": 33500,
+      "name": "XL 7 Gb / 28 H",
+      "price": 36000,
+      "stock": 1,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791373066390",
+      "cost": 20000,
+      "name": "Kartu XL 3 Gb / 28 H",
+      "price": 30000,
+      "stock": 7,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791373018102",
+      "cost": 56500,
+      "name": "XL 23 GB / 28 H",
+      "price": 60000,
+      "stock": 2,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791372973222",
+      "cost": 14500,
+      "name": "XL 5 GB / 5 H",
+      "price": 18000,
+      "stock": 7,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791372940782",
+      "cost": 11500,
+      "name": "XL 6 GB / 2 H",
+      "price": 13000,
+      "stock": 9,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791372888302",
+      "cost": 94500,
+      "name": "XL 65 GB / 28 H",
+      "price": 100000,
+      "stock": 1,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791372853670",
+      "cost": 21000,
+      "name": "XL 7 Gb / 10 H",
+      "price": 23000,
+      "stock": 6,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791372776887",
+      "cost": 19000,
+      "name": "XL 8 Gb / 7 H",
+      "price": 22000,
+      "stock": 10,
+      "category": "XL"
+    },
+    {
+      "id": "prd_1791372522158",
+      "cost": 18497,
+      "name": "Smart 9 Gb / 7 H",
+      "price": 22000,
+      "stock": 4,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791372466302",
+      "cost": 10500,
+      "name": "Smart 6 Gb / 2 H",
+      "price": 13000,
+      "stock": 4,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791372298006",
+      "cost": 13000,
+      "name": "Smart 2.5 Gb / 10 H",
+      "price": 16000,
+      "stock": 5,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791372245814",
+      "cost": 23999,
+      "name": "Smart 14 Gb UL / 7 H",
+      "price": 30000,
+      "stock": 7,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791372186462",
+      "cost": 37998,
+      "name": "Smart 9 Gb / 28 H",
+      "price": 42000,
+      "stock": 4,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791372076302",
+      "cost": 14855,
+      "name": "Smart 10 Gb / 3 H",
+      "price": 20000,
+      "stock": 3,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791372031734",
+      "cost": 8284,
+      "name": "Smart 10 Gb / 1 H",
+      "price": 10000,
+      "stock": 6,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791371989526",
+      "cost": 79499,
+      "name": "Smart 1.5 Gb UL / 28 H",
+      "price": 82000,
+      "stock": 4,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791371925246",
+      "cost": 65550,
+      "name": "Smart 1 Gb UL / 28 H",
+      "price": 70000,
+      "stock": 2,
+      "category": "Smartfren"
+    },
+    {
+      "id": "prd_1791371440222",
+      "cost": 28000,
+      "name": "Tel 11 Gb / 7 H",
+      "price": 30000,
+      "stock": 4,
+      "category": "Telkomsel"
+    },
+    {
+      "id": "prd_1791371387966",
+      "cost": 20000,
+      "name": "Tel 7 Gb / 7 H",
+      "price": 23000,
+      "stock": 0,
+      "category": "Telkomsel"
+    },
+    {
+      "id": "prd_1791371351734",
+      "cost": 8500,
+      "name": "Tel 7 Gb / 1 H",
+      "price": 10000,
+      "stock": 0,
+      "category": "Telkomsel"
+    },
+    {
+      "id": "prd_1791371300638",
+      "cost": 11000,
+      "name": "Tel 6 Gb / 2 H",
+      "price": 13000,
+      "stock": 0,
+      "category": "Telkomsel"
+    },
+    {
+      "id": "prd_1791371259774",
+      "cost": 23500,
+      "name": "Tel 11 Gb / 5 H",
+      "price": 26000,
+      "stock": 4,
+      "category": "Telkomsel"
+    },
+    {
+      "id": "prd_1791371212590",
+      "cost": 42500,
+      "name": "Tel 10 Gb / 28 H",
+      "price": 46000,
+      "stock": 4,
+      "category": "Telkomsel"
+    },
+    {
+      "id": "prd_1791371166957",
+      "cost": 13500,
+      "name": "Tel 4 Gb / 5 H",
+      "price": 15000,
+      "stock": 7,
+      "category": "Telkomsel"
+    },
+    {
+      "id": "prd_1791371017942",
+      "cost": 16500,
+      "name": "By U 7.5 Gb / 7 H",
+      "price": 20000,
+      "stock": 0,
+      "category": "By U Telkomsel"
+    },
+    {
+      "id": "prd_3",
+      "cost": 23000,
+      "name": "Voucher Tri Happy 9GB 30 Hari",
+      "price": 26000,
+      "stock": 15,
+      "category": "Voucher Data"
+    },
+    {
+      "id": "prd_2",
+      "cost": 48000,
+      "name": "Voucher Indosat Freedom 24GB",
+      "price": 52000,
+      "stock": 15,
+      "category": "Voucher Data"
+    },
+    {
+      "id": "prd_1",
+      "cost": 34000,
+      "name": "Voucher Telkomsel 14GB 30 Hari",
+      "price": 37000,
+      "stock": 20,
+      "category": "Voucher Data"
+    },
+    {
+      "id": "prd_5",
+      "cost": 18000,
+      "name": "Kartu Perdana Axis Sinyal Kuat",
+      "price": 22000,
+      "stock": 20,
+      "category": "Kartu Perdana"
+    },
+    {
+      "id": "prd_4",
+      "cost": 38000,
+      "name": "Kartu Perdana XL 30GB Siap Pakai",
+      "price": 43000,
+      "stock": 10,
+      "category": "Kartu Perdana"
+    },
+    {
+      "id": "prd_8",
+      "cost": 15000,
+      "name": "Earphone Gaming Super Bass",
+      "price": 30000,
+      "stock": 10,
+      "category": "Aksesoris HP"
+    },
+    {
+      "id": "prd_7",
+      "cost": 32000,
+      "name": "Kepala Charger 20W Quick Charge",
+      "price": 50000,
+      "stock": 10,
+      "category": "Aksesoris HP"
+    },
+    {
+      "id": "prd_1791379682912",
+      "name": "parfum 10 k",
+      "category": "Parfum",
+      "stock": 23,
+      "cost": 8500,
+      "price": 10000
+    },
+    {
+      "id": "prd_1791379643601",
+      "name": "Parfum 5 k",
+      "category": "Parfum",
+      "stock": 32,
+      "cost": 3500,
+      "price": 5000
+    },
+    {
+      "id": "prd_6",
+      "name": "Kabel Data Type-C Fast Charge 3A",
+      "category": "Aksesoris HP",
+      "stock": 15,
+      "cost": 12000,
+      "price": 25000
+    }
+  ],
+  "debtPayments": [],
+  "transactions": [],
+  "drawerHistory": [],
+  "supabaseConfig": {
+    "key": "sb_publishable_RtL-wNXu2pQqv7L9wiqrWg_gpnLpN4-",
+    "url": "https://bpwfhssrkgbeaaihbczr.supabase.co/rest/v1/"
+  }
+}

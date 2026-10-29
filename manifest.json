@@ -1,0 +1,31 @@
+{
+  "id": "/",
+  "name": "Izdiihar Cell POS",
+  "short_name": "Izdiihar POS",
+  "description": "Aplikasi Kasir POS & Konter Pulsa Izdiihar Cell",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#08111e",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

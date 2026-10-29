@@ -1,0 +1,2953 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>IZDIIHAR CELL - Catatan Penjualan & Buku Hutang</title>
+  <meta name="description" content="Aplikasi kasir, pencatatan stok voucher/aksesoris, dan buku piutang pelanggan untuk IZDIIHAR CELL.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- PWA & Android Mobile App Support -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Izdiihar POS">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Supabase JS Client for Realtime Cloud Database -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body data-theme="dark">
+
+  <div class="app-container">
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>IZDIIHAR CELL</h1>
+          <p>Kasir, Stok &amp; Hutang</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-item" data-view="pos" id="nav-pos">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span>Kasir (POS)</span>
+        </button>
+
+        <button class="nav-item" data-view="inventory" id="nav-inventory">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          <span>Stok Barang</span>
+          <span class="nav-badge" id="sidebar-stock-alert" style="display: none;">0</span>
+        </button>
+
+        <button class="nav-item" data-view="debts" id="nav-debts" data-admin-only>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+          <span>Buku Hutang</span>
+          <span class="nav-badge" id="sidebar-debt-count">0</span>
+        </button>
+
+        <button class="nav-item" data-view="reports" id="nav-reports" data-admin-only>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+          <span>Laporan &amp; Riwayat</span>
+        </button>
+
+        <button class="nav-item" data-view="operational" id="nav-operational" data-admin-only>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Kas Operasional</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="btn-open-cloud-config" data-admin-only style="margin-bottom: 8px; border-left: 3px solid var(--primary);">
+          <span style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <span>⚡ Cloud Database</span>
+            <span id="sidebar-cloud-badge" class="badge" style="font-size: 0.65rem; background: var(--primary-soft); color: var(--primary);">Lokal</span>
+          </span>
+        </button>
+        <button class="theme-toggle-btn" id="btn-open-user-settings" data-admin-only style="margin-bottom: 8px;">
+          <span>👥 Kelola Kasir &amp; PIN</span>
+        </button>
+        <button class="theme-toggle-btn" id="btn-sidebar-install-pwa" style="margin-bottom: 8px; border-left: 3px solid #38bdf8;">
+          <span>📲 Pasang Aplikasi HP</span>
+        </button>
+        <button class="theme-toggle-btn" id="theme-toggle-btn" title="Ganti Tema">
+          <span id="theme-text">Mode Gelap</span>
+          <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h2 id="page-title">Dashboard Penjualan</h2>
+          <span id="current-date-display">Sabtu, 3 Oktober 2026</span>
+        </div>
+        <div class="topbar-actions">
+          <div class="user-profile-badge" id="topbar-user-badge">
+            <span id="current-user-role-tag" class="role-tag admin">Admin</span>
+            <span id="current-user-name">Pemilik Konter</span>
+            <button class="btn-logout" id="btn-logout" title="Kunci / Keluar Akun">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
+          </div>
+          <div class="sync-status-pill online" id="sync-status-indicator" title="Sinkronisasi Data Real-Time">
+            <span class="sync-dot"></span>
+            <span id="sync-status-text">Real-Time Sync</span>
+          </div>
+          <button class="drawer-cash-btn" id="btn-topbar-drawer" title="Kelola Kas &amp; Uang di Laci">
+            <span>💵 Laci:</span>
+            <span id="topbar-drawer-amount">Rp 0</span>
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btn-quick-theme" title="Ubah Tema">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+          <button class="btn btn-primary" id="btn-topbar-kasir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Buka Kasir</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: DASHBOARD -->
+      <section class="content-view active" id="view-dashboard">
+        <!-- PWA Install Card for Mobile Users -->
+        <div id="pwa-install-card" style="display: none; margin-bottom: 16px; background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.25) 100%); border: 1.5px solid rgba(14, 165, 233, 0.4); border-radius: var(--radius-md); padding: 12px 14px; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="/icon.svg" width="36" height="36" style="border-radius: 8px;" alt="Logo Izdiihar Cell">
+            <div>
+              <div style="font-size: 0.86rem; font-weight: 700; color: var(--text-main);">📲 Pasang Aplikasi di HP</div>
+              <div style="font-size: 0.72rem; color: var(--text-secondary);">Tinggal klik, pasang langsung di menu HP kasir</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-pwa-install" style="font-weight: 800; padding: 6px 14px;">
+            Pasang
+          </button>
+        </div>
+
+        <!-- Low Stock Alert Banner -->
+        <div id="dashboard-stock-banner" style="display: none; margin-bottom: 20px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); padding: 14px 18px; border-radius: var(--radius-md); align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px; color: var(--danger); font-size: 0.88rem; font-weight: 600;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span id="low-stock-alert-text">Perhatian: Terdapat 2 produk yang stoknya menipis (&le; 3 pcs)!</span>
+          </div>
+          <button class="btn btn-danger btn-sm" id="btn-check-stock">Lihat Stok</button>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="stats-grid">
+          <div class="stat-card" style="border-left: 4px solid var(--primary); cursor: pointer;" id="card-stat-drawer">
+            <div class="stat-card-header">
+              <span class="stat-label">Uang Fisik di Laci Kasir</span>
+              <div class="stat-icon green">💵</div>
+            </div>
+            <div class="stat-value" id="stat-drawer-cash" style="color: var(--primary);">Rp 0</div>
+            <div class="stat-hint" id="stat-drawer-hint">Klik untuk kelola / rekap laci</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Omset Hari Ini</span>
+              <div class="stat-icon blue">💰</div>
+            </div>
+            <div class="stat-value" id="stat-today-revenue">Rp 0</div>
+            <div class="stat-hint" id="stat-today-tx-count">0 Transaksi sukses</div>
+          </div>
+
+          <div class="stat-card" data-admin-only>
+            <div class="stat-card-header">
+              <span class="stat-label">Laba Bersih Hari Ini</span>
+              <div class="stat-icon green">📈</div>
+            </div>
+            <div class="stat-value" id="stat-today-profit" style="color: var(--primary);">Rp 0</div>
+            <div class="stat-hint">Keuntungan kotor - modal</div>
+          </div>
+
+          <div class="stat-card" data-admin-only>
+            <div class="stat-card-header">
+              <span class="stat-label">Total Piutang Belum Lunas</span>
+              <div class="stat-icon orange">📝</div>
+            </div>
+            <div class="stat-value" id="stat-total-debt" style="color: var(--warning);">Rp 0</div>
+            <div class="stat-hint" id="stat-debt-people">0 orang pelanggan berhutang</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Item Barang</span>
+              <div class="stat-icon purple">📦</div>
+            </div>
+            <div class="stat-value" id="stat-total-items">0</div>
+            <div class="stat-hint" id="stat-total-stock-pcs">0 pcs stok tersedia</div>
+          </div>
+        </div>
+
+        <!-- Rekap Pembayaran Hari Ini (Tunai, QRIS, Transfer) -->
+        <div class="table-card" style="margin-bottom: 20px;">
+          <div class="table-header-bar" style="padding: 14px 18px;">
+            <div>
+              <h3 style="font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                <span>📊 Rekap Pembayaran Hari Ini</span>
+              </h3>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Rincian total uang masuk berdasarkan metode pembayaran (Tunai, QRIS, Transfer)</span>
+            </div>
+          </div>
+          <div style="padding: 16px 18px;">
+            <div class="payment-recap-grid">
+              <div class="recap-card recap-cash">
+                <div class="recap-header">
+                  <span class="recap-title">💵 Uang Tunai (Cash)</span>
+                  <span class="badge badge-success" id="dash-recap-cash-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="dash-recap-cash-amount">Rp 0</div>
+                <span class="recap-note">Fisik masuk ke laci kasir</span>
+              </div>
+
+              <div class="recap-card recap-qris">
+                <div class="recap-header">
+                  <span class="recap-title">📱 QRIS (Scan QR)</span>
+                  <span class="badge badge-blue" id="dash-recap-qris-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="dash-recap-qris-amount">Rp 0</div>
+                <span class="recap-note">Masuk ke saldo merchant QRIS</span>
+              </div>
+
+              <div class="recap-card recap-transfer">
+                <div class="recap-header">
+                  <span class="recap-title">🏦 Transfer Bank / E-Wallet</span>
+                  <span class="badge badge-purple" id="dash-recap-transfer-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="dash-recap-transfer-amount">Rp 0</div>
+                <span class="recap-note">Masuk ke rekening konter</span>
+              </div>
+
+              <div class="recap-card recap-debt" data-admin-only>
+                <div class="recap-header">
+                  <span class="recap-title">📝 Hutang / Kasbon</span>
+                  <span class="badge badge-warning" id="dash-recap-debt-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="dash-recap-debt-amount">Rp 0</div>
+                <span class="recap-note">Belum lunas (Piutang)</span>
+              </div>
+
+              <div class="recap-card recap-expense">
+                <div class="recap-header">
+                  <span class="recap-title">💸 Pengeluaran Kas Laci</span>
+                  <span class="badge badge-danger" id="dash-recap-expense-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="dash-recap-expense-amount">- Rp 0</div>
+                <span class="recap-note">Biaya operasional toko hari ini</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Access Banners -->
+        <div class="quick-action-banner">
+          <div class="action-card" id="card-act-kasir">
+            <div class="action-icon" style="background: var(--primary-soft); color: var(--primary);">🛒</div>
+            <div class="action-info">
+              <h3>Kasir Penjualan</h3>
+              <p>Voucher fisik, perdana, &amp; aksesoris</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-pulsa">
+            <div class="action-icon" style="background: var(--primary-soft); color: var(--primary);">⚡</div>
+            <div class="action-info">
+              <h3>Pulsa &amp; Paket Data</h3>
+              <p>Isi pulsa &amp; tembak kuota all operator</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-ewallet">
+            <div class="action-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--blue);">💳</div>
+            <div class="action-info">
+              <h3>Top Up &amp; Transfer</h3>
+              <p>DANA, GoPay, OVO, transfer bank</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-cashout">
+            <div class="action-icon" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">💸</div>
+            <div class="action-info">
+              <h3>Tarik Tunai / Saldo</h3>
+              <p>Ambil uang tunai dari laci kasir</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-manual-receipt">
+            <div class="action-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">🧾</div>
+            <div class="action-info">
+              <h3>Buat Struk Manual</h3>
+              <p>Struk servis HP, cetak kustom, non-stok</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-expense">
+            <div class="action-icon" style="background: rgba(225, 29, 72, 0.15); color: #f43f5e;">🏷️</div>
+            <div class="action-info">
+              <h3>Biaya Operasional Toko</h3>
+              <p>Listrik, bensin, konsumsi, ATK dari laci</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-hutang" data-admin-only>
+            <div class="action-icon" style="background: var(--warning-soft); color: var(--warning);">📖</div>
+            <div class="action-info">
+              <h3>Buku Hutang / Piutang</h3>
+              <p>Catat kasbon dan kirim pengingat WhatsApp</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-stok">
+            <div class="action-icon" style="background: var(--blue-soft); color: var(--blue);">🏷️</div>
+            <div class="action-info">
+              <h3>Tambah &amp; Cek Stok</h3>
+              <p>Kelola voucher fisik, kartu perdana, aksesoris</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-monthly-recap" data-admin-only>
+            <div class="action-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">📅</div>
+            <div class="action-info">
+              <h3>Rekapan Bulanan</h3>
+              <p>Omset, laba bersih, &amp; tren bulanan</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-users" data-admin-only>
+            <div class="action-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">👥</div>
+            <div class="action-info">
+              <h3>Kelola Kasir &amp; PIN</h3>
+              <p>Tambah beberapa kasir &amp; atur PIN</p>
+            </div>
+          </div>
+
+          <div class="action-card" id="card-act-operational" data-admin-only>
+            <div class="action-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">💰</div>
+            <div class="action-info">
+              <h3>Buku Kas Operasional</h3>
+              <p>Pemasukan modal &amp; belanja toko sebulan</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions Table -->
+        <div class="table-card">
+          <div class="table-header-bar" style="flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 id="dash-recent-title" style="margin: 0; font-size: 1.05rem;">Riwayat Transaksi Penjualan</h3>
+              <span id="dash-recent-subtitle" style="font-size: 0.78rem; color: var(--text-secondary);">Filter catatan penjualan kasir</span>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm dash-recent-filter-btn active" data-dash-filter="today">📅 Hari Ini</button>
+              <button type="button" class="btn btn-secondary btn-sm dash-recent-filter-btn" data-dash-filter="yesterday">⏮️ Kemarin</button>
+              <button type="button" class="btn btn-secondary btn-sm dash-recent-filter-btn" data-dash-filter="all">📋 Semua</button>
+              <div class="custom-date-picker-box" id="box-dash-custom-date" title="Pilih tanggal tertentu untuk melihat riwayat penjualan hari tersebut">
+                <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600;">📆 Pilih Tgl:</span>
+                <input type="date" id="dash-custom-date" class="custom-date-picker-input">
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-see-all-history">Lihat Laporan &rarr;</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>No / ID</th>
+                  <th>Waktu</th>
+                  <th>Rincian Item</th>
+                  <th>Metode</th>
+                  <th>Total Bayar</th>
+                  <th data-admin-only>Laba Bersih</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-recent-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Barang & Produk Paling Laris Dibeli -->
+        <div class="table-card" style="margin-top: 20px;">
+          <div class="table-header-bar" style="flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="display: flex; align-items: center; gap: 8px;">
+                <span>🔥 Produk &amp; Barang Paling Laris Dibeli</span>
+              </h3>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Peringkat barang paling sering dibeli, jumlah unit terjual &amp; total perolehan omset</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <div class="dash-top-filter-group">
+                <button type="button" class="btn-filter-pill active dash-top-filter" data-period="all">Semua Waktu</button>
+                <button type="button" class="btn-filter-pill dash-top-filter" data-period="month">Bulan Ini</button>
+                <button type="button" class="btn-filter-pill dash-top-filter" data-period="7days">7 Hari</button>
+                <button type="button" class="btn-filter-pill dash-top-filter" data-period="today">Hari Ini</button>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-open-top-products-modal" title="Lihat Peringkat Seluruh Produk">
+                Lihat Seluruh Peringkat &rarr;
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Rank</th>
+                  <th>Nama Barang / Produk</th>
+                  <th>Kategori</th>
+                  <th>Terjual</th>
+                  <th>Total Omset</th>
+                  <th data-admin-only>Total Laba</th>
+                  <th>Sisa Stok</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-top-selling-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+          <div style="padding: 10px 18px; border-top: 1px solid var(--border-color); font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+            <span id="dash-top-selling-count-hint">Menampilkan 5 produk paling laris.</span>
+            <span style="font-style: italic;">Diperbarui otomatis dari setiap transaksi penjualan</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: KASIR (POINT OF SALE) -->
+      <section class="content-view" id="view-pos">
+        <div class="pos-layout">
+          <!-- Catalog & Quick Top-Up Section -->
+          <div class="pos-catalog-panel">
+            <div class="catalog-search-bar" style="display: flex; gap: 8px; align-items: center;">
+              <div class="search-input-group" style="flex: 1;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="pos-search-input" placeholder="Cari voucher, kartu perdana, aksesoris...">
+              </div>
+              <button type="button" class="btn btn-warning btn-sm" id="btn-pos-top-products" style="white-space: nowrap; display: flex; align-items: center; gap: 6px; font-weight: 700; padding: 10px 14px; border-radius: var(--radius-md); background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; border: none; cursor: pointer;" title="Lihat Peringkat Barang Paling Laris">
+                <span>🔥 Top Laris</span>
+              </button>
+              <button type="button" class="btn btn-primary btn-sm btn-manual-receipt-theme" id="btn-pos-manual-receipt" style="white-space: nowrap; display: flex; align-items: center; gap: 6px; font-weight: 700; padding: 10px 14px; border-radius: var(--radius-md); border: none; cursor: pointer;" title="Buat Struk Kustom / Manual">
+                <span>🧾 Struk Manual</span>
+              </button>
+              <button type="button" class="btn btn-danger btn-sm btn-expense-theme" id="btn-pos-expense" style="white-space: nowrap; display: flex; align-items: center; gap: 6px; font-weight: 700; padding: 10px 14px; border-radius: var(--radius-md); border: none; cursor: pointer;" title="Catat Pengeluaran Operasional / Kas Keluar dari Laci">
+                <span>📉 Kas Keluar</span>
+              </button>
+            </div>
+
+            <!-- Categories Tabs -->
+            <div class="category-pills" id="pos-category-pills">
+              <button class="pill-btn active" data-pos-cat="all">Semua</button>
+              <button class="pill-btn" data-pos-cat="top-selling" style="border-color: rgba(245, 158, 11, 0.5); color: #f59e0b; font-weight: 700; background: rgba(245, 158, 11, 0.1);">🔥 Paling Laris</button>
+              <button class="pill-btn" data-pos-cat="Voucher Data">Voucher Data</button>
+              <button class="pill-btn" data-pos-cat="Kartu Perdana">Kartu Perdana</button>
+              <button class="pill-btn" data-pos-cat="Aksesoris HP">Aksesoris HP</button>
+              <button class="pill-btn" data-pos-cat="Lainnya">Lainnya</button>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="products-grid" id="pos-product-grid">
+              <!-- Dynamically Populated -->
+            </div>
+
+            <!-- Quick Digital, E-Wallet & Cash-Out Buttons (Separated) -->
+            <div class="quick-topup-section">
+              <button class="quick-action-button btn-pulsa-theme" id="btn-open-pulsa-paket" type="button">
+                <div class="quick-btn-icon">⚡</div>
+                <div class="quick-btn-text">
+                  <strong>Isi Pulsa Biasa &amp; Paket Data Tembak</strong>
+                  <small>Telkomsel, Indosat, XL, Axis, Tri, Smartfren, PLN &bull; Input Manual Modal &amp; Jual</small>
+                </div>
+              </button>
+
+              <button class="quick-action-button btn-ewallet-theme" id="btn-open-ewallet-transfer" type="button">
+                <div class="quick-btn-icon">💳</div>
+                <div class="quick-btn-text">
+                  <strong>Top Up E-Wallet &amp; Transfer Bank</strong>
+                  <small>DANA, GoPay, OVO, ShopeePay, BRI, BCA, Mandiri, dll &bull; Input Manual Modal &amp; Jual</small>
+                </div>
+              </button>
+
+              <button class="quick-action-button btn-cashout-theme" id="btn-open-cashout" type="button">
+                <div class="quick-btn-icon">💸</div>
+                <div class="quick-btn-text">
+                  <strong>Tarik Tunai / Saldo / Kas Keluar</strong>
+                  <small>Uang tunai keluar dari laci kasir</small>
+                </div>
+              </button>
+
+              <button class="quick-action-button btn-manual-receipt-theme" id="btn-open-manual-receipt" type="button">
+                <div class="quick-btn-icon">🧾</div>
+                <div class="quick-btn-text">
+                  <strong>Buat Struk Kustom / Manual</strong>
+                  <small>Servis HP, ganti LCD, tempered glass, jasa, cetak kustom &bull; Cetak langsung atau catat pembukuan</small>
+                </div>
+              </button>
+
+              <button class="quick-action-button btn-expense-theme" id="btn-open-expense" type="button">
+                <div class="quick-btn-icon">📉</div>
+                <div class="quick-btn-text">
+                  <strong>Pengeluaran Operasional Konter</strong>
+                  <small>Listrik, bensin, konsumsi, ATK, wifi &bull; Uang keluar langsung dari laci kasir</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cart / Checkout Panel -->
+          <div class="pos-cart-panel">
+            <div class="cart-header">
+              <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <span>Keranjang</span>
+              </h3>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn btn-secondary btn-sm" id="btn-open-pos-history" type="button" title="Lihat riwayat transaksi kasir &amp; koreksi salah input (maks 24 jam)" style="display: flex; align-items: center; gap: 4px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  <span>Riwayat &amp; Hapus</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-clear-cart">Kosongkan</button>
+              </div>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="cart-items-list" id="pos-cart-list">
+              <div class="cart-empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                <p>Keranjang kosong.<br>Klik produk di sebelah kiri atau tambah transaksi digital.</p>
+              </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="cart-summary">
+              <div class="summary-row" data-admin-only>
+                <span>Total Modal:</span>
+                <span id="cart-cost-display">Rp 0</span>
+              </div>
+              <div class="summary-row profit" data-admin-only>
+                <span>Estimasi Laba Bersih:</span>
+                <span id="cart-profit-display">+ Rp 0</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total Tagihan:</span>
+                <span id="cart-total-display" style="color: var(--primary);">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Payment Mode -->
+            <div class="payment-selector">
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Metode Pembayaran:</label>
+              <div class="payment-options-grid">
+                <button type="button" class="payment-opt-btn active" data-method="Tunai">💵 Tunai</button>
+                <button type="button" class="payment-opt-btn" data-method="QRIS">📱 QRIS</button>
+                <button type="button" class="payment-opt-btn" data-method="Transfer">🏦 Transfer</button>
+                <button type="button" class="payment-opt-btn debt-opt" data-method="Hutang" data-admin-only>📝 HUTANG</button>
+              </div>
+
+              <!-- Payment Separation Hints -->
+              <div id="payment-hint-tunai" class="payment-method-hint" style="display: block; margin-top: 8px; font-size: 0.76rem; background: var(--primary-soft); color: var(--primary); padding: 7px 10px; border-radius: var(--radius-sm); border-left: 3px solid var(--primary); line-height: 1.35;">
+                💵 <b>Uang Tunai:</b> Uang kertas/koin diterima kasir &amp; masuk ke dalam laci (wajib dihitung saat rekap tutup kasir).
+              </div>
+              <div id="payment-hint-qris" class="payment-method-hint" style="display: none; margin-top: 8px; font-size: 0.76rem; background: var(--blue-soft); color: var(--blue); padding: 7px 10px; border-radius: var(--radius-sm); border-left: 3px solid var(--blue); line-height: 1.35;">
+                📱 <b>QRIS Merchant:</b> Uang langsung masuk rekening digital / merchant. <b>TIDAK masuk laci fisik</b> (otomatis dipisahkan &amp; tidak dihitung dalam rekap uang laci kasir).
+              </div>
+              <div id="payment-hint-transfer" class="payment-method-hint" style="display: none; margin-top: 8px; font-size: 0.76rem; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; padding: 7px 10px; border-radius: var(--radius-sm); border-left: 3px solid #8b5cf6; line-height: 1.35;">
+                🏦 <b>Transfer Bank:</b> Dana masuk langsung ke rekening bank konter. <b>TIDAK masuk laci fisik</b>.
+              </div>
+              <div id="payment-hint-hutang" class="payment-method-hint" style="display: none; margin-top: 8px; font-size: 0.76rem; background: var(--warning-soft); color: var(--warning); padding: 7px 10px; border-radius: var(--radius-sm); border-left: 3px solid var(--warning); line-height: 1.35;">
+                📝 <b>Kasbon / Hutang:</b> Belum ada uang tunai masuk. Otomatis tercatat di Buku Catatan Hutang pelanggan.
+              </div>
+
+              <!-- Cash change calculation if cash -->
+              <div id="cash-payment-calc" style="margin-top: 6px;">
+                <div class="form-group">
+                  <input type="number" class="form-control" id="cash-received-input" placeholder="Uang diterima (Contoh: 50000)">
+                </div>
+                <div class="summary-row" style="font-size: 0.8rem; margin-top: 4px;">
+                  <span>Kembalian:</span>
+                  <span id="cash-change-display" style="font-weight: 700; color: var(--blue);">Rp 0</span>
+                </div>
+              </div>
+
+              <!-- Debt details section (Visible only when Hutang is clicked) -->
+              <div class="debt-customer-input" id="cart-debt-section">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--warning);">
+                  ⚠️ Catat Kasbon / Hutang Pelanggan:
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" id="debt-customer-name" placeholder="Nama Pelanggan (Wajib)">
+                </div>
+                <div class="form-group">
+                  <input type="tel" class="form-control" id="debt-customer-phone" placeholder="No. WhatsApp (Contoh: 08123456789)">
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control" id="debt-customer-notes" placeholder="Catatan / Janji Bayar (Opsional)">
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" id="btn-process-checkout" style="margin-top: 16px; padding: 12px; font-size: 1rem;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Selesaikan Transaksi</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: MANAJEMEN STOK BARANG -->
+      <section class="content-view" id="view-inventory">
+        <!-- Stock Quick Stats -->
+        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Varian Produk</span>
+              <div class="stat-icon purple">📦</div>
+            </div>
+            <div class="stat-value" id="inv-stat-total-items">0</div>
+            <div class="stat-hint">Jenis barang terdaftar</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Stok Fisik</span>
+              <div class="stat-icon green">🔢</div>
+            </div>
+            <div class="stat-value" id="inv-stat-total-pcs">0 pcs</div>
+            <div class="stat-hint">Jumlah unit siap jual</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Stok Menipis / Habis</span>
+              <div class="stat-icon orange">⚠️</div>
+            </div>
+            <div class="stat-value" id="inv-stat-low-stock" style="color: var(--warning);">0 item</div>
+            <div class="stat-hint">Perlu restok (&le; 3 pcs)</div>
+          </div>
+
+          <div class="stat-card" data-admin-only>
+            <div class="stat-card-header">
+              <span class="stat-label">Estimasi Nilai Modal</span>
+              <div class="stat-icon blue">💰</div>
+            </div>
+            <div class="stat-value" id="inv-stat-total-asset" style="color: var(--blue);">Rp 0</div>
+            <div class="stat-hint">Total aset modal barang</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <!-- Category Filter Pills Bar -->
+          <div style="padding: 16px 20px 0 20px; border-bottom: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; gap: 6px;">
+                <span>📁 Filter Kategori Barang:</span>
+              </span>
+              <span id="inventory-count-summary" style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">
+                Menampilkan 0 produk
+              </span>
+            </div>
+            <div class="category-pills" id="inventory-category-pills" style="margin-bottom: 14px;">
+              <!-- Dynamically Populated with count badges -->
+            </div>
+          </div>
+
+          <div class="table-header-bar">
+            <div>
+              <h3>Daftar Stok Barang &amp; Voucher</h3>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Pantau sisa voucher kuota fisik, kartu perdana, dan aksesoris</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <div class="search-input-group" style="min-width: 170px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="inventory-search-input" placeholder="Cari nama barang...">
+              </div>
+              <select class="form-control" id="inventory-filter-category" style="width: auto; padding: 6px 12px; font-size: 0.84rem;">
+                <option value="all">Semua Kategori</option>
+                <!-- Dynamically Populated -->
+              </select>
+              <select class="form-control" id="inventory-filter-status" style="width: auto; padding: 6px 12px; font-size: 0.84rem;">
+                <option value="all">Semua Status Stok</option>
+                <option value="available">✅ Tersedia</option>
+                <option value="low">⚠️ Menipis (&le; 3 pcs)</option>
+                <option value="out">❌ Habis (0 pcs)</option>
+              </select>
+              <button class="btn btn-primary" id="btn-open-add-product" data-admin-only>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Tambah Barang Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Nama Barang</th>
+                  <th>Kategori</th>
+                  <th>Sisa Stok</th>
+                  <th data-admin-only>Harga Modal</th>
+                  <th>Harga Jual</th>
+                  <th data-admin-only>Laba / pcs</th>
+                  <th>Status</th>
+                  <th data-admin-only>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: BUKU HUTANG / PIUTANG -->
+      <section class="content-view" id="view-debts" data-admin-only>
+        <!-- Debt summary cards -->
+        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Piutang Belum Lunas</span>
+              <div class="stat-icon orange">⚠️</div>
+            </div>
+            <div class="stat-value" id="debt-view-total-unpaid" style="color: var(--warning);">Rp 0</div>
+            <div class="stat-hint">Uang Anda yang belum kembali</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Orang Belum Lunas</span>
+              <div class="stat-icon purple">👥</div>
+            </div>
+            <div class="stat-value" id="debt-view-count-unpaid">0</div>
+            <div class="stat-hint">Pelanggan berstatus kasbon</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Sudah Terbayar</span>
+              <div class="stat-icon green">✅</div>
+            </div>
+            <div class="stat-value" id="debt-view-total-paid" style="color: var(--primary);">Rp 0</div>
+            <div class="stat-hint">Riwayat piutang yang telah lunas</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header-bar">
+            <div>
+              <h3>Daftar Hutang / Piutang Pelanggan</h3>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Catat kasbon, terima cicilan, dan kirim tagihan santun via WhatsApp</span>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select class="form-control" id="debt-filter-status" style="width: auto; padding: 6px 12px; font-size: 0.84rem;">
+                <option value="all">Semua Status</option>
+                <option value="unpaid" selected>Belum Lunas &amp; Sebagian</option>
+                <option value="paid">Sudah Lunas</option>
+              </select>
+              <button class="btn btn-primary" id="btn-open-add-debt">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Catat Hutang Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Pelanggan</th>
+                  <th>WhatsApp</th>
+                  <th>Keterangan / Item</th>
+                  <th>Total Hutang</th>
+                  <th>Sisa Hutang</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="debts-table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: LAPORAN & RIWAYAT -->
+      <section class="content-view" id="view-reports">
+        <!-- Sub-Navigation: Laporan Harian vs Rekapan Bulanan -->
+        <div class="report-nav-tabs">
+          <button class="report-tab-btn active" id="tab-btn-report-daily" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            <span>Riwayat &amp; Filter Harian</span>
+          </button>
+          <button class="report-tab-btn" id="tab-btn-report-monthly" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>📅 Rekapan Bulanan (Lengkap)</span>
+          </button>
+        </div>
+
+        <!-- SUBVIEW 1: DAILY / PERIOD FILTER & TRANSACTION HISTORY -->
+        <div id="subview-report-daily">
+          <!-- Date Filter & Metrics -->
+          <div class="table-card" style="margin-bottom: 24px;">
+            <div class="table-header-bar">
+              <div>
+                <h3>Filter Laporan Penjualan</h3>
+                <span style="font-size: 0.78rem; color: var(--text-secondary);" id="report-period-subtitle">Pilih rentang tanggal untuk melihat rekap omset dan keuntungan bersih</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-secondary btn-sm report-filter-btn active" data-range="today">📅 Hari Ini</button>
+                <button class="btn btn-secondary btn-sm report-filter-btn" data-range="yesterday">⏮️ Kemarin</button>
+                <button class="btn btn-secondary btn-sm report-filter-btn" data-range="week">7 Hari Terakhir</button>
+                <button class="btn btn-secondary btn-sm report-filter-btn" data-range="month">Bulan Ini</button>
+                <button class="btn btn-secondary btn-sm report-filter-btn" data-range="all">Semua Waktu</button>
+                <div class="custom-date-picker-box" id="box-report-custom-date" title="Pilih tanggal tertentu untuk melihat laporan hari tersebut">
+                  <span style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 600;">📆 Pilih Tanggal:</span>
+                  <input type="date" id="report-custom-date" class="custom-date-picker-input">
+                </div>
+              </div>
+            </div>
+            <div style="padding: 20px;">
+              <div class="stats-grid" style="margin-bottom: 0;">
+                <div class="stat-card">
+                  <span class="stat-label">Total Omset Penjualan</span>
+                  <div class="stat-value" id="report-revenue">Rp 0</div>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Total Modal Barang</span>
+                  <div class="stat-value" id="report-cost">Rp 0</div>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Total Keuntungan Bersih</span>
+                  <div class="stat-value" id="report-profit" style="color: var(--primary);">Rp 0</div>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Jumlah Transaksi</span>
+                  <div class="stat-value" id="report-tx-count">0</div>
+                </div>
+              </div>
+
+              <!-- Rekap Metode Pembayaran Periode Terpilih -->
+              <div style="border-top: 1px dashed var(--border-color); padding-top: 16px; margin-top: 16px;">
+                <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                  <span>📊 Rekap per Metode Pembayaran (Periode Ini):</span>
+                </div>
+                <div class="payment-recap-grid">
+                  <div class="recap-card recap-cash">
+                    <div class="recap-header">
+                      <span class="recap-title">💵 Uang Tunai</span>
+                      <span class="badge badge-success" id="report-recap-cash-count">0 Trx</span>
+                    </div>
+                    <div class="recap-amount" id="report-recap-cash-amount">Rp 0</div>
+                  </div>
+                  <div class="recap-card recap-qris">
+                    <div class="recap-header">
+                      <span class="recap-title">📱 QRIS</span>
+                      <span class="badge badge-blue" id="report-recap-qris-count">0 Trx</span>
+                    </div>
+                    <div class="recap-amount" id="report-recap-qris-amount">Rp 0</div>
+                  </div>
+                  <div class="recap-card recap-transfer">
+                    <div class="recap-header">
+                      <span class="recap-title">🏦 Transfer Bank / E-Wallet</span>
+                      <span class="badge badge-purple" id="report-recap-transfer-count">0 Trx</span>
+                    </div>
+                    <div class="recap-amount" id="report-recap-transfer-amount">Rp 0</div>
+                  </div>
+                  <div class="recap-card recap-debt">
+                    <div class="recap-header">
+                      <span class="recap-title">📝 Hutang</span>
+                      <span class="badge badge-warning" id="report-recap-debt-count">0 Trx</span>
+                    </div>
+                    <div class="recap-amount" id="report-recap-debt-amount">Rp 0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction History List -->
+          <div class="table-card" style="margin-bottom: 24px;">
+            <div class="table-header-bar">
+              <div>
+                <h3>Daftar Riwayat Transaksi</h3>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <select class="form-control" id="report-filter-method" style="width: auto; padding: 6px 12px; font-size: 0.84rem;">
+                  <option value="all">Semua Metode Pembayaran</option>
+                  <option value="Tunai">💵 Hanya Tunai</option>
+                  <option value="QRIS">📱 Hanya QRIS</option>
+                  <option value="Transfer">🏦 Hanya Transfer / E-Wallet</option>
+                  <option value="Hutang">📝 Hanya Hutang</option>
+                  <option value="cash_out">💸 Hanya Tarik Tunai</option>
+                  <option value="expense">📉 Hanya Pengeluaran Operasional</option>
+                </select>
+                <button class="btn btn-secondary btn-sm" id="btn-export-csv">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span>Export ke Excel / CSV</span>
+                </button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>No. Transaksi</th>
+                    <th>Tanggal &amp; Jam</th>
+                    <th>Rincian Produk / Layanan</th>
+                    <th>Metode</th>
+                    <th>Total Modal</th>
+                    <th>Total Penjualan</th>
+                    <th>Laba</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-table-body">
+                  <!-- Dynamically Populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBVIEW 2: MONTHLY RECAP COMPLETE -->
+        <div id="subview-report-monthly" style="display: none;">
+          <!-- Month Selector Toolbar -->
+          <div class="month-selector-bar">
+            <div class="month-nav-group">
+              <button class="month-nav-btn" id="btn-month-prev" title="Bulan Sebelumnya">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span>Bulan Lalu</span>
+              </button>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <select class="form-control" id="monthly-select-month" style="font-weight: 700; padding: 7px 12px; width: auto;">
+                  <option value="01">Januari</option>
+                  <option value="02">Februari</option>
+                  <option value="03">Maret</option>
+                  <option value="04">April</option>
+                  <option value="05">Mei</option>
+                  <option value="06">Juni</option>
+                  <option value="07">Juli</option>
+                  <option value="08">Agustus</option>
+                  <option value="09">September</option>
+                  <option value="10">Oktober</option>
+                  <option value="11">November</option>
+                  <option value="12">Desember</option>
+                </select>
+                <select class="form-control" id="monthly-select-year" style="font-weight: 700; padding: 7px 12px; width: auto;">
+                  <option value="2025">2025</option>
+                  <option value="2026" selected>2026</option>
+                  <option value="2027">2027</option>
+                </select>
+              </div>
+              <button class="month-nav-btn" id="btn-month-next" title="Bulan Berikutnya">
+                <span>Bulan Depan</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btn-month-current">Bulan Ini</button>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-sm" id="btn-print-monthly-recap">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <span>Cetak Rekap Bulanan</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btn-export-monthly-csv">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export CSV Bulanan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Monthly Performance Stats Cards -->
+          <div class="stats-grid" style="margin-bottom: 20px;">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Omset Bulan Ini</span>
+                <div class="stat-icon blue">💰</div>
+              </div>
+              <div class="stat-value" id="month-stat-revenue">Rp 0</div>
+              <div class="stat-hint" id="month-stat-daily-avg">Rata-rata: Rp 0 / hari</div>
+            </div>
+
+            <div class="stat-card" data-admin-only>
+              <div class="stat-card-header">
+                <span class="stat-label">Total Modal Barang</span>
+                <div class="stat-icon purple">📦</div>
+              </div>
+              <div class="stat-value" id="month-stat-cost">Rp 0</div>
+              <div class="stat-hint">HPP modal barang terjual</div>
+            </div>
+
+            <div class="stat-card" data-admin-only>
+              <div class="stat-card-header">
+                <span class="stat-label">Keuntungan Bersih (Laba)</span>
+                <div class="stat-icon green">📈</div>
+              </div>
+              <div class="stat-value" id="month-stat-profit" style="color: var(--primary);">Rp 0</div>
+              <div class="stat-hint" id="month-stat-margin">Margin laba: 0%</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Jumlah Transaksi</span>
+                <div class="stat-icon orange">🧾</div>
+              </div>
+              <div class="stat-value" id="month-stat-count">0</div>
+              <div class="stat-hint" id="month-stat-peak-day">Hari teramai: -</div>
+            </div>
+          </div>
+
+          <!-- Monthly Payment Method Recap Cards -->
+          <div class="table-card" style="margin-bottom: 24px; padding: 20px;">
+            <div style="font-size: 0.88rem; font-weight: 700; margin-bottom: 14px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between;">
+              <span>💳 Rekap Metode Pembayaran di Bulan <span id="month-recap-title-text" style="color: var(--primary);">-</span>:</span>
+            </div>
+            <div class="payment-recap-grid">
+              <div class="recap-card recap-cash">
+                <div class="recap-header">
+                  <span class="recap-title">💵 Uang Tunai</span>
+                  <span class="badge badge-success" id="month-recap-cash-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="month-recap-cash-amount">Rp 0</div>
+                <div class="recap-note">Penjualan tunai kasir</div>
+              </div>
+              <div class="recap-card recap-qris">
+                <div class="recap-header">
+                  <span class="recap-title">📱 QRIS</span>
+                  <span class="badge badge-blue" id="month-recap-qris-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="month-recap-qris-amount">Rp 0</div>
+                <div class="recap-note">Scan QR code digital</div>
+              </div>
+              <div class="recap-card recap-transfer">
+                <div class="recap-header">
+                  <span class="recap-title">🏦 Transfer Bank / E-Wallet</span>
+                  <span class="badge badge-purple" id="month-recap-transfer-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="month-recap-transfer-amount">Rp 0</div>
+                <div class="recap-note">Mutasi rekening konter</div>
+              </div>
+              <div class="recap-card recap-debt">
+                <div class="recap-header">
+                  <span class="recap-title">📝 Kasbon / Hutang Baru</span>
+                  <span class="badge badge-warning" id="month-recap-debt-count">0 Trx</span>
+                </div>
+                <div class="recap-amount" id="month-recap-debt-amount">Rp 0</div>
+                <div class="recap-note">Piutang belum lunas</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Breakdown Table in Selected Month -->
+          <div class="table-card" style="margin-bottom: 24px;">
+            <div class="table-header-bar">
+              <div>
+                <h3>Rincian Penjualan Hari-per-Hari (<span id="month-daily-table-title">-</span>)</h3>
+                <span style="font-size: 0.78rem; color: var(--text-secondary);">Pantau tren transaksi, uang masuk, dan laba harian dalam sebulan</span>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Hari</th>
+                    <th>Jumlah Trx</th>
+                    <th>Kas Tunai</th>
+                    <th>Non-Tunai (QRIS &amp; TF)</th>
+                    <th>Total Omset</th>
+                    <th data-admin-only>Laba Bersih</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="month-daily-table-body">
+                  <!-- Dynamically populated day by day -->
+                </tbody>
+                <tfoot id="month-daily-table-foot" style="background-color: rgba(0, 0, 0, 0.15); font-weight: 800;">
+                  <!-- Dynamically populated totals -->
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Annual 12-Month Comparison Table -->
+          <div class="table-card" style="margin-bottom: 24px;">
+            <div class="table-header-bar">
+              <div>
+                <h3>Rekapitulasi 12 Bulan di Tahun <span id="annual-year-text">2026</span></h3>
+                <span style="font-size: 0.78rem; color: var(--text-secondary);">Perbandingan performa penjualan setiap bulan dari Januari hingga Desember</span>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>Bulan</th>
+                    <th>Total Transaksi</th>
+                    <th>Total Omset</th>
+                    <th data-admin-only>Total Modal</th>
+                    <th data-admin-only>Laba Bersih</th>
+                    <th data-admin-only>Margin Laba</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="annual-months-table-body">
+                  <!-- 12 months dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Backup & Reset Card -->
+        <div class="table-card">
+          <div class="table-header-bar">
+            <h3>Cadangan &amp; Keamanan Data (Backup)</h3>
+          </div>
+          <div style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+            <p style="font-size: 0.88rem; color: var(--text-secondary);">
+              Data aplikasi Anda disimpan aman di browser HP dan Laptop ini. Anda dapat mengunduh file cadangan (*.json) kapan saja untuk dipindahkan ke HP atau Laptop lain.
+            </p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-primary" id="btn-backup-data">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Unduh Cadangan (Backup Data JSON)</span>
+              </button>
+              <label class="btn btn-secondary" style="cursor: pointer;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>Pulihkan Data (Restore Backup)</span>
+                <input type="file" id="input-restore-file" accept=".json" style="display: none;">
+              </label>
+              <button class="btn btn-danger" id="btn-reset-all-notes" style="background-color: #dc2626;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Kosongkan Transaksi &amp; Hutang (Stok Produk Tetap Aman)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: BUKU KAS & BELANJA OPERASIONAL (ADMIN ONLY) -->
+      <section class="content-view" id="view-operational" data-admin-only>
+        <!-- Top Action Bar -->
+        <div class="table-card" style="margin-bottom: 20px; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
+                <span>💰</span> Buku Kas &amp; Belanja Operasional Toko
+              </h2>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">
+                Pencatatan uang masuk modal &amp; belanja operasional konter sebulan (Khusus Hak Akses Admin)
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-sm" id="btn-open-op-income" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; border: none; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <span>🟢 + Catat Pemasukan</span>
+              </button>
+              <button type="button" class="btn btn-sm" id="btn-open-op-expense" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; font-weight: 700; border: none; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <span>🔴 - Catat Belanja Operasional</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-print-op-monthly" style="display: flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <span>Cetak Rekap</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-export-op-csv" style="display: flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly Navigation & Filter Toolbar -->
+        <div class="op-month-nav-container">
+          <div class="op-month-selector-group">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-op-prev-month" title="Bulan Sebelumnya">
+              ◀ Bulan Lalu
+            </button>
+            <div class="op-month-title">
+              📅 <span id="op-current-month-display">Oktober 2026</span>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-op-next-month" title="Bulan Berikutnya">
+              Bulan Depan ▶
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-op-current-month">
+              Bulan Ini
+            </button>
+            <select class="form-control" id="op-select-month" style="width: auto; padding: 5px 8px; font-size: 0.82rem;">
+              <option value="01">Januari</option>
+              <option value="02">Februari</option>
+              <option value="03">Maret</option>
+              <option value="04">April</option>
+              <option value="05">Mei</option>
+              <option value="06">Juni</option>
+              <option value="07">Juli</option>
+              <option value="08">Agustus</option>
+              <option value="09">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+            <select class="form-control" id="op-select-year" style="width: auto; padding: 5px 8px; font-size: 0.82rem;">
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <!-- Filter Type -->
+            <div style="display: inline-flex; gap: 4px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 2px;">
+              <button type="button" class="btn btn-sm op-type-filter-btn active" data-op-filter="all" style="font-size: 0.78rem; padding: 6px 10px;">Semua</button>
+              <button type="button" class="btn btn-sm op-type-filter-btn" data-op-filter="income" style="font-size: 0.78rem; padding: 6px 10px; color: #10b981;">🟢 Pemasukan</button>
+              <button type="button" class="btn btn-sm op-type-filter-btn" data-op-filter="expense" style="font-size: 0.78rem; padding: 6px 10px; color: #ef4444;">🔴 Belanja</button>
+            </div>
+
+            <!-- Filter Category -->
+            <select class="form-control" id="op-filter-category" style="width: auto; padding: 5px 10px; font-size: 0.82rem;">
+              <option value="all">Semua Kategori</option>
+              <option value="Kulakan">🛒 Kulakan Stok Barang</option>
+              <option value="Listrik">⚡ Listrik PLN</option>
+              <option value="Internet">🌐 WiFi / Internet Toko</option>
+              <option value="Sewa">🏪 Sewa Tempat / Kios</option>
+              <option value="Gaji">👤 Gaji &amp; Konsumsi</option>
+              <option value="Perlengkapan">📦 Perlengkapan Toko / Plastik</option>
+              <option value="ATK">🧾 ATK &amp; Kertas Struk</option>
+              <option value="Modal">💰 Modal Tambahan Admin</option>
+              <option value="Lainnya">📝 Biaya Lainnya</option>
+            </select>
+
+            <!-- Search input -->
+            <input type="text" class="form-control" id="op-search-input" placeholder="🔍 Cari keperluan..." style="width: 170px; padding: 5px 10px; font-size: 0.82rem;">
+          </div>
+        </div>
+
+        <!-- Monthly Financial Summary Cards -->
+        <div class="stats-grid" style="margin-bottom: 20px;">
+          <div class="stat-card op-stat-card-income">
+            <span class="stat-label">Total Pemasukan Operasional</span>
+            <div class="stat-value" id="op-stat-income" style="color: #10b981;">Rp 0</div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;" id="op-stat-income-count">0 transaksi masuk</div>
+          </div>
+
+          <div class="stat-card op-stat-card-expense">
+            <span class="stat-label">Total Pengeluaran Belanja</span>
+            <div class="stat-value" id="op-stat-expense" style="color: #ef4444;">Rp 0</div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;" id="op-stat-expense-count">0 transaksi belanja</div>
+          </div>
+
+          <div class="stat-card op-stat-card-net">
+            <span class="stat-label">Saldo Bersih Operasional</span>
+            <div class="stat-value" id="op-stat-net" style="color: #0284c7;">Rp 0</div>
+            <div style="font-size: 0.74rem; margin-top: 4px;" id="op-stat-net-badge">
+              <span class="badge badge-success">Surplus Kas</span>
+            </div>
+          </div>
+
+          <div class="stat-card op-stat-card-kulakan">
+            <span class="stat-label">Belanja Kulakan Stok Toko</span>
+            <div class="stat-value" id="op-stat-kulakan" style="color: #f59e0b;">Rp 0</div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;" id="op-stat-kulakan-count">Alokasi stok dagang</div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown Mini Box -->
+        <div class="op-category-breakdown-box" id="op-category-breakdown-container">
+          <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <span>📊 Rincian Pengeluaran Belanja per Pos Kategori (Bulan Ini):</span>
+            <span id="op-breakdown-total-hint" style="font-size: 0.75rem; color: var(--text-secondary);"></span>
+          </div>
+          <div id="op-category-breakdown-chips" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Table of Operational Transactions -->
+        <div class="table-card">
+          <div class="table-header-bar">
+            <div>
+              <h3 style="margin: 0; font-size: 1.05rem;">Buku Catatan Masuk &amp; Keluar Sebulan</h3>
+              <span id="op-table-subtitle" style="font-size: 0.78rem; color: var(--text-secondary);">Daftar riwayat tanggal masuk dan keluar selama sebulan</span>
+            </div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);" id="op-table-count-badge">
+              0 Catatan
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">No.</th>
+                  <th style="width: 170px;">Tanggal Masuk / Keluar</th>
+                  <th style="width: 130px;">Jenis</th>
+                  <th style="width: 160px;">Kategori</th>
+                  <th>Keterangan / Keperluan Belanja</th>
+                  <th style="width: 140px; text-align: right;">Nominal (Rp)</th>
+                  <th style="width: 150px;">Sumber / Penerima</th>
+                  <th style="width: 120px;">Petugas</th>
+                  <th style="width: 90px; text-align: center;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="op-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Floating Mobile Cart Bar (Active when cart has items) -->
+    <div id="mobile-floating-cart-bar" class="mobile-floating-cart-bar" style="display: none;">
+      <div class="mfc-info">
+        <div class="mfc-badge">🛒 <span id="mfc-total-qty">0</span> Barang Dipilih</div>
+        <div class="mfc-total" id="mfc-total-amount">Rp 0</div>
+      </div>
+      <button type="button" class="btn mfc-btn" id="btn-mfc-checkout">
+        <span>Bayar Sekarang ⚡</span>
+      </button>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-bar">
+      <button class="mobile-nav-btn active" data-view="dashboard" id="mob-dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>Ringkasan</span>
+      </button>
+
+      <button class="mobile-nav-btn" data-view="pos" id="mob-pos">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <span>Kasir</span>
+      </button>
+
+      <button class="mobile-nav-btn" data-view="inventory" id="mob-inventory">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+        <span>Stok</span>
+        <span class="mobile-nav-badge" id="mob-stock-alert" style="display: none;"></span>
+      </button>
+
+      <button class="mobile-nav-btn" data-view="debts" id="mob-debts" data-admin-only>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+        <span>Hutang</span>
+        <span class="mobile-nav-badge" id="mob-debt-badge" style="display: none;"></span>
+      </button>
+
+      <button class="mobile-nav-btn" data-view="reports" id="mob-reports" data-admin-only>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+        <span>Laporan</span>
+      </button>
+
+      <button class="mobile-nav-btn" data-view="operational" id="mob-operational" data-admin-only>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        <span>Kas Opr</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1A: Transaksi Pulsa Biasa & Paket Data Tembak -->
+  <div class="modal-overlay" id="modal-pulsa-paket">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">⚡</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem;">Isi Pulsa Biasa &amp; Paket Data Tembak</h3>
+            <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">Input manual modal server dan harga jual pelanggan</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Jenis Transaksi Radio/Pills -->
+        <div class="form-group">
+          <label>Jenis Layanan</label>
+          <div class="custom-chip-group" id="pulsa-type-group">
+            <button type="button" class="chip-select-btn active" data-pulsa-type="Pulsa Reguler">Pulsa Reguler</button>
+            <button type="button" class="chip-select-btn" data-pulsa-type="Paket Data Tembak">Paket Data Tembak</button>
+            <button type="button" class="chip-select-btn" data-pulsa-type="Pulsa Transfer">Pulsa Transfer</button>
+            <button type="button" class="chip-select-btn" data-pulsa-type="Token PLN">Token PLN</button>
+          </div>
+        </div>
+
+        <!-- Pilihan Operator Cepat -->
+        <div class="form-group">
+          <label style="margin-bottom: 4px; font-weight: 700;">Pilih Operator / Provider:</label>
+          <div class="operator-select-grid" id="operator-select-grid">
+            <button type="button" class="operator-chip-btn active" data-op="Telkomsel">Telkomsel</button>
+            <button type="button" class="operator-chip-btn" data-op="Indosat">Indosat</button>
+            <button type="button" class="operator-chip-btn" data-op="XL">XL Axiata</button>
+            <button type="button" class="operator-chip-btn" data-op="Axis">Axis</button>
+            <button type="button" class="operator-chip-btn" data-op="Tri">Tri (3)</button>
+            <button type="button" class="operator-chip-btn" data-op="Smartfren">Smartfren</button>
+            <button type="button" class="operator-chip-btn" data-op="PLN">PLN Listrik</button>
+            <button type="button" class="operator-chip-btn" data-op="Lainnya">Lainnya</button>
+          </div>
+        </div>
+
+        <!-- Nominal Cepat / Keterangan Paket -->
+        <div class="form-group">
+          <label id="label-pulsa-nominal">Pilih Nominal Pulsa Cepat:</label>
+          <div class="nominal-preset-grid" id="pulsa-preset-grid">
+            <button type="button" class="preset-chip" data-nom="5000" data-cost="5250" data-price="7000">5.000</button>
+            <button type="button" class="preset-chip" data-nom="10000" data-cost="10250" data-price="12000">10.000</button>
+            <button type="button" class="preset-chip" data-nom="15000" data-cost="15200" data-price="17000">15.000</button>
+            <button type="button" class="preset-chip" data-nom="20000" data-cost="20200" data-price="22000">20.000</button>
+            <button type="button" class="preset-chip" data-nom="25000" data-cost="25150" data-price="27000">25.000</button>
+            <button type="button" class="preset-chip" data-nom="50000" data-cost="50150" data-price="52000">50.000</button>
+            <button type="button" class="preset-chip" data-nom="100000" data-cost="99800" data-price="102000">100.000</button>
+          </div>
+          <input type="text" class="form-control" id="pulsa-package-name" placeholder="Atau ketik nama paket / kuota custom (cth: Freedom 15GB 30hr)" style="margin-top: 8px;">
+        </div>
+
+        <!-- Input Manual Modal Awal & Harga Jual -->
+        <div class="pricing-card-box">
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label style="color: #f59e0b; font-weight: 700;">Modal Awal Server (Rp)</label>
+              <input type="number" class="form-control" id="pulsa-cost-price" placeholder="Contoh: 10250" style="font-family: var(--font-mono); font-weight: 700; border-color: #f59e0b;">
+              <small style="color: var(--text-muted); font-size: 0.72rem;">Saldo server yang terpotong</small>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label style="color: var(--primary); font-weight: 700;">Harga Jual Pelanggan (Rp)</label>
+              <input type="number" class="form-control" id="pulsa-sell-price" placeholder="Contoh: 12000" style="font-family: var(--font-mono); font-weight: 700; border-color: var(--primary);">
+              <small style="color: var(--text-muted); font-size: 0.72rem;">Total yang dibayar pembeli</small>
+            </div>
+          </div>
+          <div id="pulsa-profit-box" class="profit-preview-badge">
+            <span>Estimasi Margin Keuntungan:</span>
+            <strong id="pulsa-profit-val">+Rp 0</strong>
+          </div>
+        </div>
+
+        <!-- Catatan Tambahan (Opsional) -->
+        <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
+          <input type="text" class="form-control" id="pulsa-notes" placeholder="Catatan tambahan opsional (No. HP atau nama jika ingin dicatat)" style="font-size: 0.82rem;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-add-pulsa-to-cart">
+          <span>+ Masukkan Keranjang</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 1B: Top Up E-Wallet & Transfer Bank -->
+  <div class="modal-overlay" id="modal-ewallet-transfer">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">💳</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem;">Top Up E-Wallet &amp; Transfer Bank</h3>
+            <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">Kirim saldo finansial &amp; input manual modal awal dan harga jual</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Jenis Layanan Finansial -->
+        <div class="form-group">
+          <label>Tipe Transaksi</label>
+          <div class="custom-chip-group" id="fin-type-group">
+            <button type="button" class="chip-select-btn active" data-fin-type="Top Up E-Wallet">Top Up E-Wallet</button>
+            <button type="button" class="chip-select-btn" data-fin-type="Transfer Bank">Transfer Bank</button>
+            <button type="button" class="chip-select-btn" data-fin-type="Tagihan / Game">Game / Tagihan</button>
+          </div>
+        </div>
+
+        <!-- Pilihan E-Wallet / Bank Tujuan -->
+        <div class="form-group">
+          <label id="label-fin-platform">Pilih E-Wallet Tujuan:</label>
+          <div class="operator-select-grid" id="fin-platform-grid">
+            <button type="button" class="platform-chip-btn active" data-platform="DANA">DANA</button>
+            <button type="button" class="platform-chip-btn" data-platform="GoPay">GoPay</button>
+            <button type="button" class="platform-chip-btn" data-platform="OVO">OVO</button>
+            <button type="button" class="platform-chip-btn" data-platform="ShopeePay">ShopeePay</button>
+            <button type="button" class="platform-chip-btn" data-platform="LinkAja">LinkAja</button>
+            <button type="button" class="platform-chip-btn" data-platform="Maxim">Maxim</button>
+            <button type="button" class="platform-chip-btn" data-platform="BRI">Bank BRI</button>
+            <button type="button" class="platform-chip-btn" data-platform="BCA">Bank BCA</button>
+            <button type="button" class="platform-chip-btn" data-platform="Mandiri">Mandiri</button>
+            <button type="button" class="platform-chip-btn" data-platform="BNI">Bank BNI</button>
+            <button type="button" class="platform-chip-btn" data-platform="SeaBank">SeaBank</button>
+            <button type="button" class="platform-chip-btn" data-platform="Lainnya">Lainnya...</button>
+          </div>
+        </div>
+
+        <!-- Nominal Saldo Ditransfer -->
+        <div class="form-group">
+          <label>Nominal Saldo (Modal Saldo Terpotong)</label>
+          <div class="nominal-preset-grid" id="fin-preset-grid">
+            <button type="button" class="preset-chip" data-val="20000">20.000</button>
+            <button type="button" class="preset-chip" data-val="50000">50.000</button>
+            <button type="button" class="preset-chip" data-val="100000">100.000</button>
+            <button type="button" class="preset-chip" data-val="200000">200.000</button>
+            <button type="button" class="preset-chip" data-val="300000">300.000</button>
+            <button type="button" class="preset-chip" data-val="500000">500.000</button>
+            <button type="button" class="preset-chip" data-val="1000000">1.000.000</button>
+          </div>
+          <input type="number" class="form-control" id="fin-amount" placeholder="Ketik nominal saldo, misal: 100000" style="margin-top: 8px; font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: #f59e0b;">
+        </div>
+
+        <!-- Menu Cepat Biaya Admin Konter (2k, 3k, 5k, 7k, 10k) -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label style="margin: 0; font-weight: 700;">Biaya Admin / Jasa Konter:</label>
+            <span style="font-size: 0.72rem; color: var(--primary); font-weight: 600;">(Keuntungan Konter)</span>
+          </div>
+          <div class="admin-fee-quick-grid" id="fin-fee-presets">
+            <button type="button" class="fee-preset-chip" data-fee="2000">+2k (2.000)</button>
+            <button type="button" class="fee-preset-chip active" data-fee="3000">+3k (3.000)</button>
+            <button type="button" class="fee-preset-chip" data-fee="5000">+5k (5.000)</button>
+            <button type="button" class="fee-preset-chip" data-fee="7000">+7k (7.000)</button>
+            <button type="button" class="fee-preset-chip" data-fee="10000">+10k (10.000)</button>
+          </div>
+          <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">Nominal Admin:</span>
+            <input type="number" class="form-control" id="fin-admin-fee-input" value="3000" placeholder="Biaya Admin" style="font-family: var(--font-mono); font-weight: 700; font-size: 0.95rem; color: var(--primary);">
+          </div>
+        </div>
+
+        <!-- Input Manual Modal Awal & Total Harga Jual -->
+        <div class="pricing-card-box">
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label style="color: #f59e0b; font-weight: 700;">Modal Saldo Keluar (Rp)</label>
+              <input type="number" class="form-control" id="fin-cost-price" placeholder="Saldo keluar" style="font-family: var(--font-mono); font-weight: 700; border-color: #f59e0b;">
+              <small style="color: var(--text-muted); font-size: 0.72rem;">Saldo riil yang berkurang</small>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label style="color: var(--primary); font-weight: 700;">Harga Jual Pelanggan (Rp)</label>
+              <input type="number" class="form-control" id="fin-sell-price" placeholder="Total bayar" style="font-family: var(--font-mono); font-weight: 700; border-color: var(--primary);">
+              <small style="color: var(--text-muted); font-size: 0.72rem;">Total uang diterima dari pelanggan</small>
+            </div>
+          </div>
+          <div id="fin-profit-box" class="profit-preview-badge">
+            <span>Keuntungan Bersih Admin Konter:</span>
+            <strong id="fin-profit-val">+Rp 3.000</strong>
+          </div>
+        </div>
+
+        <!-- Catatan / No Rekening (Opsional Saja) -->
+        <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
+          <input type="text" class="form-control" id="fin-notes" placeholder="Catatan tambahan opsional (No. Rek / HP / nama jika ingin dicatat)" style="font-size: 0.82rem;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-add-fin-to-cart">
+          <span>+ Masukkan Keranjang</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Tambah / Edit Produk Stok -->
+  <div class="modal-overlay" id="modal-product">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-product-title">Tambah Produk Baru</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="product-id">
+        <div class="form-group">
+          <label>Nama Barang / Voucher</label>
+          <input type="text" class="form-control" id="product-name" placeholder="Contoh: Voucher Telkomsel 14GB 30 Hari">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kategori Barang</label>
+            <select class="form-control" id="product-category">
+              <option value="Voucher Data">Voucher Data</option>
+              <option value="Kartu Perdana">Kartu Perdana</option>
+              <option value="Aksesoris HP">Aksesoris HP</option>
+              <option value="Pulsa & Paket">Pulsa & Paket</option>
+              <option value="Lainnya">Lainnya</option>
+              <option value="__new__">+ Tambah Kategori Baru...</option>
+            </select>
+            <input type="text" class="form-control" id="product-new-category" placeholder="Ketik nama kategori baru..." style="display: none; margin-top: 8px;">
+          </div>
+          <div class="form-group">
+            <label>Jumlah Stok Awal (pcs)</label>
+            <input type="number" class="form-control" id="product-stock" min="0" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Harga Modal Satuan (Rp)</label>
+            <input type="number" class="form-control" id="product-cost-price" placeholder="Contoh: 35000">
+          </div>
+          <div class="form-group">
+            <label>Harga Jual Satuan (Rp)</label>
+            <input type="number" class="form-control" id="product-sell-price" placeholder="Contoh: 38000">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-save-product">Simpan Produk</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Restock Barang Cepat -->
+  <div class="modal-overlay" id="modal-restock">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Tambah Stok (Restok)</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="restock-product-id">
+        <p style="font-size: 0.9rem; font-weight: 600;" id="restock-product-name">Produk: -</p>
+        <p style="font-size: 0.8rem; color: var(--text-secondary);" id="restock-current-stock">Stok saat ini: 0 pcs</p>
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Jumlah Tambahan Stok Masuk (pcs)</label>
+          <input type="number" class="form-control" id="restock-amount-input" min="1" value="10">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-save-restock">Tambah ke Stok</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Tambah Hutang Manual -->
+  <div class="modal-overlay" id="modal-debt-manual">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Catat Hutang / Kasbon Manual</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nama Pelanggan (Wajib)</label>
+          <input type="text" class="form-control" id="manual-debt-customer" placeholder="Contoh: Mas Budi / Bu Siti">
+        </div>
+        <div class="form-group">
+          <label>Nomor WhatsApp (Untuk kirim tagihan)</label>
+          <input type="tel" class="form-control" id="manual-debt-phone" placeholder="Contoh: 08123456789">
+        </div>
+        <div class="form-group">
+          <label>Barang / Layanan yang Dihutang</label>
+          <input type="text" class="form-control" id="manual-debt-item" placeholder="Contoh: Paket Data Telkomsel 14GB + Kabel Data">
+        </div>
+        <div class="form-group">
+          <label>Nominal Hutang (Rp)</label>
+          <input type="number" class="form-control" id="manual-debt-amount" placeholder="Contoh: 55000">
+        </div>
+        <div class="form-group">
+          <label>Catatan / Janji Tanggal Bayar</label>
+          <input type="text" class="form-control" id="manual-debt-notes" placeholder="Contoh: Janji bayar tgl 25 pas gajian">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-save-manual-debt">Simpan ke Buku Hutang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Cicil / Bayar Hutang -->
+  <div class="modal-overlay" id="modal-pay-debt">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Bayar / Cicil Hutang Pelanggan</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pay-debt-id">
+        <p style="font-weight: 700; font-size: 1rem;" id="pay-debt-customer-name">Pelanggan: -</p>
+        <div style="background: var(--bg-input); padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-secondary);">Total Hutang Awal:</span>
+            <span id="pay-debt-total-display" style="font-weight: 600;">Rp 0</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-secondary);">Sisa Belum Dibayar:</span>
+            <span id="pay-debt-remaining-display" style="font-weight: 700; color: var(--danger);">Rp 0</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Nominal Pembayaran Sekarang (Rp)</label>
+          <input type="number" class="form-control" id="pay-debt-input-amount" placeholder="Masukkan jumlah yang dibayar">
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-quick-settle-full">Bayar Lunas Penuh</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-save-debt-payment">Simpan Pembayaran</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Struk Kasir / Cetak Thermal / Share WA -->
+  <div class="modal-overlay" id="modal-receipt">
+    <div class="modal-content" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3>Struk Penjualan</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="background-color: var(--bg-input);">
+        <!-- Printable Paper -->
+        <div class="receipt-paper" id="printable-receipt">
+          <div class="receipt-header">
+            <div class="receipt-store-name">IZDIIHAR CELL</div>
+            <div style="font-size: 0.74rem; line-height: 1.35; margin: 3px 0;">Jl. Poros Maros-Pangkep, Marumpa Kec Turikale Kabupaten Maros</div>
+            <div style="font-size: 0.78rem; font-weight: 700;">CS: 085860623669</div>
+            <div class="receipt-divider"></div>
+            <div class="receipt-row">
+              <span id="rcpt-id">TRX-000</span>
+              <span id="rcpt-date">03/10/2026</span>
+            </div>
+            <div class="receipt-row" id="rcpt-daily-seq-row" style="display: none; font-size: 0.78rem; font-weight: 700; color: var(--primary);">
+              <span>No. Urut Nota Harian:</span>
+              <span id="rcpt-daily-seq">#001</span>
+            </div>
+            <div class="receipt-row" id="rcpt-cashier-row" style="display: none; font-size: 0.74rem;">
+              <span>Kasir:</span>
+              <span id="rcpt-cashier-name">-</span>
+            </div>
+            <div class="receipt-row" id="rcpt-customer-row" style="display: none; font-size: 0.74rem;">
+              <span>Pelanggan:</span>
+              <span id="rcpt-customer-name">-</span>
+            </div>
+          </div>
+
+          <div id="rcpt-items-list">
+            <!-- Items printed here -->
+          </div>
+
+          <div class="receipt-divider"></div>
+
+          <div class="receipt-row" style="font-weight: bold; font-size: 0.95rem;">
+            <span>TOTAL:</span>
+            <span id="rcpt-total">Rp 0</span>
+          </div>
+          <div class="receipt-row">
+            <span>Metode:</span>
+            <span id="rcpt-method">Tunai</span>
+          </div>
+          <div class="receipt-row" id="rcpt-cash-row">
+            <span>Bayar:</span>
+            <span id="rcpt-paid">Rp 0</span>
+          </div>
+          <div class="receipt-row" id="rcpt-change-row">
+            <span>Kembali:</span>
+            <span id="rcpt-change">Rp 0</span>
+          </div>
+
+          <div id="rcpt-notes-box" style="display: none; border-top: 1px dashed #9ca3af; padding-top: 6px; margin-top: 6px; font-size: 0.72rem; color: #4b5563; text-align: center;">
+            <span id="rcpt-notes-text">-</span>
+          </div>
+
+          <div class="receipt-footer">
+            Terima kasih atas kunjungan Anda!<br>
+            Pulsa/Kuota/Listrik/TopUp Cepat &amp; Murah.
+          </div>
+        </div>
+
+        <!-- Tombol Batalkan / Hapus Transaksi jika Salah Input (Maks 24 Jam) -->
+        <button class="btn btn-danger btn-sm" id="btn-void-receipt" style="width: 100%; margin-top: 10px; font-weight: 700; display: none; align-items: center; justify-content: center; gap: 6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <span id="btn-void-receipt-text">Hapus / Batalkan Transaksi Ini (Salah Input)</span>
+        </button>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn btn-secondary" id="btn-share-whatsapp-receipt">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span>Kirim WA</span>
+        </button>
+        <button class="btn btn-primary" id="btn-print-receipt">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Cetak Struk (58mm)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 8B: Riwayat Transaksi Kasir & Koreksi Salah Input (< 24 Jam) -->
+  <div class="modal-overlay" id="modal-pos-history">
+    <div class="modal-content" style="max-width: 860px; max-height: 88vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+            <span>🕒</span> Riwayat Penjualan &amp; Koreksi Transaksi (Maks 24 Jam)
+          </h3>
+          <span style="font-size: 0.78rem; color: var(--text-secondary);">
+            Jika kasir salah input penjualan, transaksi dapat dibatalkan kapan saja dalam <b>24 jam</b>. Stok produk otomatis kembali ke etalase toko.
+          </span>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 14px; overflow-y: auto; flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: var(--bg-hover); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Pilih Periode:</span>
+            <button type="button" class="btn btn-secondary btn-sm pos-history-filter-btn active" data-history-filter="today">📅 Hari Ini</button>
+            <button type="button" class="btn btn-secondary btn-sm pos-history-filter-btn" data-history-filter="yesterday">⏮️ Kemarin</button>
+            <button type="button" class="btn btn-secondary btn-sm pos-history-filter-btn" data-history-filter="all">📋 Semua Riwayat</button>
+            <div class="custom-date-picker-box" id="box-pos-history-custom-date" title="Pilih tanggal tertentu untuk melihat transaksi hari tersebut">
+              <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600;">📆 Pilih Tgl:</span>
+              <input type="date" id="pos-history-custom-date" class="custom-date-picker-input">
+            </div>
+          </div>
+          <span id="pos-history-count-badge" class="badge badge-blue" style="font-size: 0.78rem;">0 Transaksi</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No / ID Transaksi</th>
+                <th>Waktu</th>
+                <th>Rincian Produk / Transaksi</th>
+                <th>Metode</th>
+                <th>Total</th>
+                <th>Batas Waktu</th>
+                <th style="text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="pos-history-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          ℹ️ Transaksi yang telah lewat dari 24 jam dikunci otomatis demi keamanan audit pembukuan.
+        </span>
+        <button class="btn btn-secondary" data-close-modal>Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 8: Cetak Rekap Bulanan Thermal / Struk -->
+  <div class="modal-overlay" id="modal-monthly-recap-print">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Cetak Rekapitulasi Bulanan</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="background-color: var(--bg-input);">
+        <div class="receipt-paper" id="printable-monthly-recap" style="max-width: 340px;">
+          <div class="receipt-header">
+            <div class="receipt-store-name">IZDIIHAR CELL</div>
+            <div style="font-size: 0.74rem; line-height: 1.35; margin: 3px 0;">Jl. Poros Maros-Pangkep, Marumpa Kec Turikale Kabupaten Maros</div>
+            <div style="font-size: 0.78rem; font-weight: 700;">CS: 085860623669</div>
+            <div class="receipt-divider"></div>
+            <div style="font-weight: 800; font-size: 0.95rem; margin-top: 4px;">REKAPITULASI PENJUALAN BULANAN</div>
+            <div id="print-month-title" style="font-size: 0.9rem; font-weight: 700; color: #2563eb; margin-top: 2px;">-</div>
+            <div style="font-size: 0.72rem; color: #6b7280; margin-top: 2px;" id="print-month-printed-at">-</div>
+          </div>
+
+          <div id="print-month-body">
+            <!-- Dynamically populated rows -->
+          </div>
+
+          <div class="receipt-footer">
+            Dicetak secara otomatis oleh sistem IZDIIHAR CELL.<br>
+            Simpan sebagai bukti pembukuan bulanan.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn btn-secondary" data-close-modal>Tutup</button>
+        <button class="btn btn-primary" id="btn-do-print-monthly">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Cetak Sekarang (58mm)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LOGIN SCREEN OVERLAY ==================== -->
+  <div class="login-overlay" id="login-overlay">
+    <div class="login-box">
+      <div class="login-brand">
+        <div class="login-brand-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+          </svg>
+        </div>
+        <h2>IZDIIHAR CELL POS</h2>
+        <p>Pilih Akun &amp; Masukkan PIN untuk Masuk</p>
+      </div>
+
+      <!-- Select Account Role / User -->
+      <div class="user-select-grid" id="login-user-select-grid">
+        <!-- Dynamically Rendered: Admin & All Cashiers -->
+      </div>
+
+      <!-- PIN Input Display -->
+      <div class="pin-display">
+        <div class="pin-dot" id="pindot-1"></div>
+        <div class="pin-dot" id="pindot-2"></div>
+        <div class="pin-dot" id="pindot-3"></div>
+        <div class="pin-dot" id="pindot-4"></div>
+      </div>
+
+      <input type="password" id="login-hidden-pin" maxlength="6" style="opacity: 0; position: absolute; pointer-events: none;">
+
+      <!-- Numeric Keypad -->
+      <div class="pin-keypad">
+        <button type="button" class="keypad-btn" data-key="1">1</button>
+        <button type="button" class="keypad-btn" data-key="2">2</button>
+        <button type="button" class="keypad-btn" data-key="3">3</button>
+        <button type="button" class="keypad-btn" data-key="4">4</button>
+        <button type="button" class="keypad-btn" data-key="5">5</button>
+        <button type="button" class="keypad-btn" data-key="6">6</button>
+        <button type="button" class="keypad-btn" data-key="7">7</button>
+        <button type="button" class="keypad-btn" data-key="8">8</button>
+        <button type="button" class="keypad-btn" data-key="9">9</button>
+        <button type="button" class="keypad-btn" data-key="C" style="color: var(--danger); font-size: 0.95rem;">C</button>
+        <button type="button" class="keypad-btn" data-key="0">0</button>
+        <button type="button" class="keypad-btn" data-key="DEL" style="font-size: 0.9rem;">⌫</button>
+      </div>
+
+      <button class="btn btn-primary" id="btn-submit-login" style="width: 100%; padding: 12px; font-size: 0.95rem;">
+        Masuk Aplikasi
+      </button>
+
+      <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 14px;">
+        💡 <b>PIN Bawaan:</b> Admin = <code style="color: var(--primary);">1234</code> | Kasir = <code style="color: var(--primary);">0000</code>
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal 7: Kelola PIN Akun & Daftar Kasir (Admin Only) -->
+  <div class="modal-overlay" id="modal-user-settings">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="display: flex; align-items: center; gap: 8px;">
+            <span>👥 Kelola Akun &amp; Daftar Kasir</span>
+          </h3>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">Atur PIN Pemilik dan kelola akun kasir pegawai toko Anda</p>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="gap: 16px;">
+        <!-- Card 1: PIN Admin (Pemilik) -->
+        <div style="background: var(--bg-input); padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+              <span>👑 PIN Pemilik (Admin / Owner)</span>
+            </h4>
+            <span class="badge badge-warning">Akses Penuh</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: flex-end;">
+            <div class="form-group" style="flex: 1;">
+              <label style="font-size: 0.76rem;">Ganti PIN Admin (4-6 Digit)</label>
+              <input type="text" class="form-control" id="settings-admin-pin" placeholder="Contoh: 1234" maxlength="6" style="font-weight: 700; letter-spacing: 2px;">
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-save-admin-pin" style="height: 40px; padding: 0 14px; font-weight: 700; white-space: nowrap;">
+              Simpan PIN
+            </button>
+          </div>
+          <small style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-top: 6px;">
+            Akses penuh melihat laporan laba bersih, rahasia modal barang, piutang, dan manajemen kasir.
+          </small>
+        </div>
+
+        <!-- Card 2: Daftar Kasir Pegawai -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+              <span>👤 Daftar Kasir Pegawai Toko</span>
+            </h4>
+            <span class="badge badge-success" id="badge-cashier-count">0 Kasir</span>
+          </div>
+          <div id="settings-cashiers-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;">
+            <!-- Dynamically populated cashier rows -->
+          </div>
+        </div>
+
+        <!-- Card 3: Form Tambah Kasir Baru -->
+        <div style="background: var(--primary-soft); border: 1px dashed var(--primary); padding: 14px 16px; border-radius: var(--radius-md);">
+          <h4 style="color: var(--primary); font-size: 0.88rem; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span>➕ Tambah Kasir Baru</span>
+          </h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">Nama Kasir / Shift</label>
+              <input type="text" class="form-control" id="new-cashier-name" placeholder="Contoh: Kasir Shift Pagi (Agus)">
+            </div>
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">PIN Kasir (4-6 Digit)</label>
+              <input type="text" class="form-control" id="new-cashier-pin" placeholder="Contoh: 0000" maxlength="6" style="font-weight: 700; letter-spacing: 2px;">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-add-cashier" style="margin-top: 10px; width: 100%; padding: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Daftarkan Kasir Baru</span>
+          </button>
+        </div>
+
+        <!-- Card 4: Form Edit Kasir (Tersembunyi secara default) -->
+        <div id="box-edit-cashier" style="display: none; background: rgba(59, 130, 246, 0.08); border: 1px solid var(--blue); padding: 14px 16px; border-radius: var(--radius-md);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="color: var(--blue); font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+              <span>✏️ Edit Kasir</span>
+            </h4>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-edit-cashier" style="padding: 2px 8px; font-size: 0.75rem;">Batal</button>
+          </div>
+          <input type="hidden" id="edit-cashier-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">Nama Kasir</label>
+              <input type="text" class="form-control" id="edit-cashier-name">
+            </div>
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">PIN Kasir</label>
+              <input type="text" class="form-control" id="edit-cashier-pin" maxlength="6" style="font-weight: 700; letter-spacing: 2px;">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-save-edit-cashier" style="margin-top: 10px; width: 100%; padding: 8px; font-weight: 700;">
+            Simpan Perubahan Kasir
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 8: Buka Kasir (Modal Awal di Laci) -->
+  <div class="modal-overlay" id="modal-open-drawer">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Buka Kasir: Uang Awal di Laci</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: var(--bg-input); padding: 14px; border-radius: var(--radius-md); font-size: 0.84rem; color: var(--text-secondary);">
+          Masukkan jumlah uang tunai pecahan kembalian yang dimasukkan ke dalam laci sebelum memulai melayani penjualan hari ini/shift ini.
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Nominal Uang Awal di Laci (Rp)</label>
+          <input type="number" class="form-control" id="input-starting-cash" placeholder="Contoh: 150000" style="font-size: 1.15rem; font-weight: 700; color: var(--primary);">
+        </div>
+
+        <!-- Quick Presets -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary btn-sm btn-drawer-preset" data-amount="50000">Rp 50.000</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-drawer-preset" data-amount="100000">Rp 100.000</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-drawer-preset" data-amount="150000">Rp 150.000</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-drawer-preset" data-amount="200000">Rp 200.000</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-drawer-preset" data-amount="300000">Rp 300.000</button>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Catatan Shift / Petugas (Opsional)</label>
+          <input type="text" class="form-control" id="input-drawer-notes" placeholder="Contoh: Shift Pagi (Mas Budi)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Nanti Saja</button>
+        <button class="btn btn-primary" id="btn-confirm-open-drawer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Simpan &amp; Buka Kasir</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 9: Rekap & Tutup Kasir (Hitung Uang Fisik Laci) -->
+  <div class="modal-overlay" id="modal-close-drawer">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+            <span>📋</span> Rekap Kas &amp; Tutup Kasir
+          </h3>
+          <span style="font-size: 0.75rem; color: var(--text-secondary);">Pemisahan Kas Fisik Laci vs Saldo Digital (QRIS / Bank)</span>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px; max-height: 80vh; overflow-y: auto;">
+        
+        <!-- Shift Info Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 0.8rem;">
+          <div><span style="color: var(--text-secondary);">Petugas Kasir:</span> <b id="close-drawer-opened-by">-</b></div>
+          <div><span style="color: var(--text-secondary);">Buka Shift:</span> <b id="close-drawer-opened-time">-</b></div>
+        </div>
+
+        <!-- KARTU 1: KAS FISIK DI LACI (UANG TUNAI NYATA) -->
+        <div style="border: 2px solid rgba(14, 165, 233, 0.4); background: rgba(14, 165, 233, 0.05); border-radius: var(--radius-md); padding: 12px 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(14, 165, 233, 0.2); padding-bottom: 6px;">
+            <span style="font-weight: 700; color: var(--primary); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+              <span>💵</span> 1. Kas Fisik di Laci (Uang Tunai Nyata)
+            </span>
+            <span class="badge badge-success" style="font-size: 0.7rem;">Wajib Dihitung Fisik</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">• Modal Awal Laci:</span>
+              <span id="close-drawer-starting" style="font-weight: 700;">Rp 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">• Penjualan Tunai Masuk:</span>
+              <span id="close-drawer-cash-sales" style="font-weight: 700; color: var(--primary);">+ Rp 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">• Cicilan Hutang Masuk (Tunai):</span>
+              <span id="close-drawer-cash-debts" style="font-weight: 700; color: var(--primary);">+ Rp 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">• Pengeluaran Operasional Toko:</span>
+              <span id="close-drawer-expenses" style="font-weight: 700; color: var(--danger);">- Rp 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">• Tarik Tunai Pelanggan (Keluar):</span>
+              <span id="close-drawer-cash-out" style="font-weight: 700; color: #f87171;">- Rp 0</span>
+            </div>
+            <div style="text-align: right; margin-top: 3px;">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-recap-add-expense" style="font-size: 0.72rem; padding: 3px 8px; font-weight: 700; color: #f43f5e;">
+                ➕ Catat Biaya Operasional Laci Dulu
+              </button>
+            </div>
+
+            <div style="border-top: 2px dashed rgba(14, 165, 233, 0.3); margin-top: 6px; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
+              <span style="font-weight: 800; color: var(--text-primary);">Total Seharusnya di Laci:</span>
+              <span id="close-drawer-expected-total" style="font-weight: 800; font-size: 1.15rem; color: var(--primary);">Rp 0</span>
+            </div>
+          </div>
+
+          <!-- Input Uang Fisik Nyata -->
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(14, 165, 233, 0.2);">
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">
+              Hitung Uang Fisik Nyata di Laci (Kertas + Koin):
+            </label>
+            <input type="number" class="form-control" id="input-actual-cash" placeholder="Masukkan total uang fisik di laci" style="font-size: 1.1rem; font-weight: 700; border-color: var(--primary);">
+            
+            <!-- Live Difference Result -->
+            <div id="drawer-diff-container" style="margin-top: 8px; padding: 10px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; text-align: center;">
+              Selisih Uang Laci: <span id="drawer-diff-amount">Rp 0 (PAS)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARTU 2: TRANSAKSI DIGITAL & QRIS (DIPISAHKAN - LUAR LACI) -->
+        <div style="border: 2px solid rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.04); border-radius: var(--radius-md); padding: 12px 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(59, 130, 246, 0.2); padding-bottom: 6px;">
+            <span style="font-weight: 700; color: var(--blue); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+              <span>📱</span> 2. Transaksi Digital / Non-Tunai (Luar Laci)
+            </span>
+            <span class="badge badge-blue" style="font-size: 0.7rem;">Saldo Rekening / Merchant</span>
+          </div>
+
+          <div style="font-size: 0.73rem; color: var(--text-secondary); background: rgba(59, 130, 246, 0.08); padding: 6px 8px; border-radius: var(--radius-sm); margin-bottom: 8px; line-height: 1.35;">
+            💡 <b>Terpisah Otomatis:</b> Dana QRIS &amp; Transfer langsung masuk rekening bank/merchant Anda. <b>TIDAK masuk laci fisik</b>, jadi kasir tidak perlu mencari uang fisiknya saat hitung laci.
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 5px; font-size: 0.82rem;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">• Penjualan QRIS:</span>
+              <span id="close-drawer-qris" style="font-weight: 700; color: var(--blue);">Rp 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">• Penjualan Transfer Bank:</span>
+              <span id="close-drawer-transfer" style="font-weight: 700; color: #8b5cf6;">Rp 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(59, 130, 246, 0.2); padding-top: 5px;">
+              <span style="font-weight: 600; color: var(--text-primary);">Total Non-Tunai / Digital:</span>
+              <span id="close-drawer-noncash" style="font-weight: 800; color: var(--blue);">Rp 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem;">
+              <span style="color: var(--text-secondary);">• Hutang Baru (Belum Masuk Kas):</span>
+              <span id="close-drawer-newdebts" style="font-weight: 600; color: var(--warning);">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Omset Keseluruhan Shift -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 0.85rem;">
+          <span style="font-weight: 600; color: var(--text-secondary);">Total Seluruh Penjualan (Shift Ini):</span>
+          <span id="close-drawer-total-revenue" style="font-weight: 800; font-size: 1rem; color: var(--text-primary);">Rp 0</span>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-confirm-close-drawer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Tutup Kasir &amp; Cetak Rekap</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 10: Tarik Tunai / Saldo / Kas Keluar Laci -->
+  <div class="modal-overlay" id="modal-cash-out">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>Tarik Tunai / Kas Keluar Laci</h3>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); padding: 12px 14px; border-radius: var(--radius-md); font-size: 0.82rem; color: #fca5a5;">
+          ⚠️ <b>Uang Tunai Keluar dari Laci:</b> Transaksi ini akan <u>mengurangi uang fisik</u> di laci kasir secara langsung.
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Kategori / Sumber Saldo</label>
+          <select class="form-control" id="cashout-category">
+            <option value="Tarik Tunai DANA / E-Wallet">Tarik Tunai DANA / OVO / GoPay / ShopeePay</option>
+            <option value="Tarik Tunai Transfer Bank">Tarik Tunai Transfer Bank (BCA/BRI/Mandiri/dll)</option>
+            <option value="Tarik Tunai QRIS">Tarik Tunai QRIS (Scan QR Konter)</option>
+            <option value="Pengeluaran Operasional Toko">Pengeluaran Kas Toko (Beli Kebutuhan / Bensin / Token Konter)</option>
+            <option value="Lainnya">Pengeluaran Kas Laci Lainnya</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Nominal Tarik Tunai (Rp)</label>
+          <input type="number" class="form-control" id="cashout-amount" placeholder="Contoh: 500000" style="font-size: 1.2rem; font-weight: 700; color: var(--danger);">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+            <span>Pilihan cepat nominal:</span>
+            <span id="cashout-drawer-available" style="color: var(--primary); font-weight: 600;">Sisa di laci: Rp 0</span>
+          </div>
+        </div>
+
+        <!-- Quick Amount Presets -->
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+          <button type="button" class="btn btn-secondary btn-sm btn-cashout-preset" data-amount="50000">Rp 50rb</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-cashout-preset" data-amount="100000">Rp 100rb</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-cashout-preset" data-amount="200000">Rp 200rb</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-cashout-preset" data-amount="500000">Rp 500rb</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-cashout-preset" data-amount="1000000">Rp 1 Juta</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-cashout-preset" data-amount="2000000">Rp 2 Juta</button>
+        </div>
+
+        <!-- Biaya Admin Input & Presets -->
+        <div class="form-group" style="margin-bottom: 8px;">
+          <label>Biaya Admin / Jasa Konter (Rp)</label>
+          <input type="number" class="form-control" id="cashout-fee" value="5000" placeholder="Contoh: 5000" style="font-weight: 700;">
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+            <button type="button" class="btn btn-secondary btn-sm btn-fee-preset" data-fee="0">Gratis (0)</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-fee-preset" data-fee="2000">Rp 2rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-fee-preset" data-fee="3000">Rp 3rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-fee-preset" data-fee="5000">Rp 5rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-fee-preset" data-fee="10000">Rp 10rb</button>
+          </div>
+        </div>
+
+        <!-- Cara Pembayaran Admin (3 Pilihan Fleksibel) -->
+        <div class="form-group" style="margin-top: 14px; margin-bottom: 6px;">
+          <label style="font-weight: 700; display: block; margin-bottom: 6px;">Metode Pembayaran Biaya Admin:</label>
+          <div class="admin-fee-mode-selector" id="admin-fee-mode-group">
+            <label class="fee-mode-card active" data-mode="deduct">
+              <input type="radio" name="cashout-admin-mode" value="deduct" checked>
+              <div class="fee-mode-info">
+                <strong>✂️ Potong di Dalam (Potong Saldo)</strong>
+                <span>Pelanggan tf nominal utuh, uang tunai dikurangi admin.<br><i>Contoh: Tf 500rb &rarr; Pegawai serahkan <b>Rp 495.000</b></i></span>
+              </div>
+            </label>
+
+            <label class="fee-mode-card" data-mode="cash">
+              <input type="radio" name="cashout-admin-mode" value="cash">
+              <div class="fee-mode-info">
+                <strong>💵 Admin Bayar Tunai (Cash)</strong>
+                <span>Pelanggan tf nominal, biaya admin diserahkan tunai.<br><i>Contoh: Tf 200rb &rarr; Serahkan <b>Rp 200.000</b> + Terima tunai <b>Rp 5.000</b></i></span>
+              </div>
+            </label>
+
+            <label class="fee-mode-card" data-mode="add">
+              <input type="radio" name="cashout-admin-mode" value="add">
+              <div class="fee-mode-info">
+                <strong>➕ Admin Ditambah ke Transfer</strong>
+                <span>Pelanggan tf nominal + biaya admin.<br><i>Contoh: Pelanggan butuh 500rb tunai &rarr; Tf <b>Rp 505.000</b></i></span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Live Calculation Box -->
+        <div class="cashout-summary-card">
+          <div class="summary-line highlight-danger">
+            <span style="font-weight: 600;">💵 Uang Tunai Diberikan ke Pelanggan:</span>
+            <strong id="cashout-disp-given" style="font-size: 1.15rem; color: #ef4444;">Rp 0</strong>
+          </div>
+          <div class="summary-line" id="cashout-row-cash-fee" style="display: none;">
+            <span style="color: #10b981; font-weight: 600;">📥 Uang Admin Tunai Diterima:</span>
+            <strong id="cashout-disp-cash-fee" style="color: #10b981;">+ Rp 0 (Masuk Laci)</strong>
+          </div>
+          <div class="summary-line">
+            <span>📱 Saldo Masuk Rekening/E-Wallet:</span>
+            <strong id="cashout-disp-digital">Rp 0</strong>
+          </div>
+          <div class="summary-line">
+            <span>📉 Pengurangan Uang Fisik di Laci:</span>
+            <strong id="cashout-disp-net-drawer" style="color: #b91c1c;">- Rp 0</strong>
+          </div>
+          <div class="summary-line" style="border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 4px;">
+            <span style="color: var(--primary); font-weight: 600;">✨ Keuntungan / Laba Admin Konter:</span>
+            <strong id="cashout-disp-profit" style="color: var(--primary); font-size: 1rem;">+ Rp 0</strong>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Nama Pelanggan &amp; WhatsApp</label>
+          <input type="text" class="form-control" id="cashout-customer" placeholder="Contoh: Mas Agus (0812xxxx)">
+        </div>
+
+        <div class="form-group">
+          <label>Catatan / Nomor Referensi Transfer (Opsional)</label>
+          <input type="text" class="form-control" id="cashout-notes" placeholder="Contoh: Saldo masuk ke DANA 0812xxxx">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-danger" id="btn-confirm-cashout" style="padding: 10px 18px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Keluarkan Uang dari Laci</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 11: Peringkat Barang / Produk Paling Laris Dibeli (Leaderboard) -->
+  <div class="modal-overlay" id="modal-top-products">
+    <div class="modal-content" style="max-width: 820px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="display: flex; align-items: center; gap: 8px;">
+            <span>🔥 Peringkat Barang &amp; Produk Paling Laris Dibeli</span>
+          </h3>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">Daftar urutan barang paling banyak dibeli oleh pelanggan</p>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="gap: 14px;">
+        <!-- Filters & Search Toolbar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div class="dash-top-filter-group" id="modal-top-filter-group">
+            <button type="button" class="btn-filter-pill active modal-top-filter" data-period="all">Semua Waktu</button>
+            <button type="button" class="btn-filter-pill modal-top-filter" data-period="month">Bulan Ini</button>
+            <button type="button" class="btn-filter-pill modal-top-filter" data-period="7days">7 Hari</button>
+            <button type="button" class="btn-filter-pill modal-top-filter" data-period="today">Hari Ini</button>
+          </div>
+          <div style="position: relative; flex: 1; max-width: 260px; min-width: 180px;">
+            <input type="text" id="modal-top-search" class="form-control" placeholder="Cari nama barang..." style="padding-left: 32px; font-size: 0.82rem; height: 34px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 10px; top: 10px; color: var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </div>
+        </div>
+
+        <!-- Summary Metric Chips -->
+        <div class="top-summary-strip">
+          <div class="top-summary-chip">
+            <span class="chip-label">Total Unit Terjual</span>
+            <span class="chip-val" id="modal-top-sum-qty" style="color: #f59e0b;">0 pcs</span>
+          </div>
+          <div class="top-summary-chip">
+            <span class="chip-label">Total Omset Produk</span>
+            <span class="chip-val" id="modal-top-sum-rev" style="color: var(--blue);">Rp 0</span>
+          </div>
+          <div class="top-summary-chip" data-admin-only>
+            <span class="chip-label">Total Laba Keuntungan</span>
+            <span class="chip-val" id="modal-top-sum-profit" style="color: var(--primary);">Rp 0</span>
+          </div>
+          <div class="top-summary-chip">
+            <span class="chip-label">Varian Barang Terjual</span>
+            <span class="chip-val" id="modal-top-sum-count" style="color: #8b5cf6;">0 Item</span>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-responsive" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <table class="modern-table" style="margin: 0;">
+            <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 2;">
+              <tr>
+                <th style="width: 50px;">Rank</th>
+                <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th style="text-align: right;">Terjual</th>
+                <th style="text-align: right;">Total Omset</th>
+                <th style="text-align: right;" data-admin-only>Total Laba</th>
+                <th style="text-align: center;">Sisa Stok</th>
+                <th style="text-align: center; width: 110px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="modal-top-selling-table-body">
+              <!-- Dynamically Populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">💡 Kasir dapat klik <b>"+ Keranjang"</b> untuk langsung melayani pesanan pembeli</span>
+        <button class="btn btn-secondary" data-close-modal>Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 12: Pembuatan Struk Secara Manual -->
+  <div class="modal-overlay" id="modal-manual-receipt">
+    <div class="modal-content" style="max-width: 760px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div>
+          <h3 style="display: flex; align-items: center; gap: 8px;">
+            <span>🧾 Pembuatan Struk Secara Manual</span>
+          </h3>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+            Buat struk custom untuk servis HP, ganti sparepart, jasa, cetak, atau transaksi tanpa stok
+          </p>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+
+      <div class="modal-body" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 18px 20px;">
+        <!-- Baris 1: Header Info Struk & Pelanggan -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>📋</span> Informasi Struk &amp; Kasir
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">No. Struk (ID)</label>
+              <input type="text" class="form-control" id="manual-rcpt-id" placeholder="M-TRX-0001" style="font-family: var(--font-mono); font-weight: 700;">
+            </div>
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">Tanggal &amp; Waktu</label>
+              <input type="text" class="form-control" id="manual-rcpt-date">
+            </div>
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">Nama Kasir / Petugas</label>
+              <input type="text" class="form-control" id="manual-rcpt-cashier" placeholder="Nama Kasir">
+            </div>
+          </div>
+          <div class="form-row" style="margin-top: 6px;">
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">Nama Pelanggan (Opsional)</label>
+              <input type="text" class="form-control" id="manual-rcpt-customer" placeholder="Contoh: Mas Agus / Bu Dewi">
+            </div>
+            <div class="form-group">
+              <label style="font-size: 0.76rem;">No. WhatsApp Pelanggan (Untuk Kirim Nota)</label>
+              <input type="tel" class="form-control" id="manual-rcpt-phone" placeholder="Contoh: 08123456789">
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris 2: Preset Pilihan Cepat Barang / Jasa -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);">⚡ Pilihan Cepat Layanan / Jasa Populer:</label>
+          </div>
+          <div class="manual-preset-strip">
+            <button type="button" class="btn-manual-preset" data-preset="Servis HP / Software" data-price="50000">📱 Servis HP / Software</button>
+            <button type="button" class="btn-manual-preset" data-preset="Ganti LCD / Touchscreen" data-price="250000">🔧 Ganti LCD / Touchscreen</button>
+            <button type="button" class="btn-manual-preset" data-preset="Ganti Baterai HP" data-price="120000">🔋 Ganti Baterai HP</button>
+            <button type="button" class="btn-manual-preset" data-preset="Pasang Tempered Glass" data-price="25000">🛡️ Pasang Tempered Glass</button>
+            <button type="button" class="btn-manual-preset" data-preset="Cetak Foto / Dokumen" data-price="10000">🖨️ Cetak Foto / Dokumen</button>
+            <button type="button" class="btn-manual-preset" data-preset="Jasa Transfer / Kirim Uang" data-price="5000">💸 Jasa Transfer Tunai</button>
+          </div>
+        </div>
+
+        <!-- Baris 3: Daftar Item / Jasa (Daftar Dinamis) -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-main);">
+              🛒 Rincian Barang &amp; Jasa yang Diberikan:
+            </label>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-manual-item" style="font-weight: 700; font-size: 0.76rem; padding: 4px 10px;">
+              ➕ Tambah Baris
+            </button>
+          </div>
+
+          <div id="manual-items-container">
+            <!-- Dynamic Rows Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Baris 4: Metode Pembayaran, Tagihan & Kembalian -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 16px;">
+          <div class="form-row" style="align-items: flex-start;">
+            <!-- Kolom Kiri: Metode Bayar & Uang Diterima -->
+            <div style="flex: 1.2;">
+              <div class="form-group">
+                <label style="font-size: 0.76rem;">Metode Pembayaran</label>
+                <select class="form-control" id="manual-payment-method" style="font-weight: 700;">
+                  <option value="Tunai">💵 Tunai (Cash)</option>
+                  <option value="QRIS">📱 QRIS (Scan QR)</option>
+                  <option value="Transfer">🏦 Transfer Bank / E-Wallet</option>
+                  <option value="Hutang">📝 Hutang / Kasbon</option>
+                </select>
+              </div>
+
+              <div id="manual-cash-calc-box" style="margin-top: 8px;">
+                <label style="font-size: 0.76rem;">Uang Tunai Diterima (Rp)</label>
+                <input type="number" class="form-control" id="manual-cash-paid" placeholder="Masukkan jumlah uang pembeli" style="font-weight: 700;">
+                
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+                  <button type="button" class="btn btn-secondary btn-sm btn-manual-cash-preset" data-cash="pas">Uang Pas</button>
+                  <button type="button" class="btn btn-secondary btn-sm btn-manual-cash-preset" data-cash="20000">20rb</button>
+                  <button type="button" class="btn btn-secondary btn-sm btn-manual-cash-preset" data-cash="50000">50rb</button>
+                  <button type="button" class="btn btn-secondary btn-sm btn-manual-cash-preset" data-cash="100000">100rb</button>
+                  <button type="button" class="btn btn-secondary btn-sm btn-manual-cash-preset" data-cash="200000">200rb</button>
+                  <button type="button" class="btn btn-secondary btn-sm btn-manual-cash-preset" data-cash="500000">500rb</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kolom Kanan: Total & Kembalian Box -->
+            <div style="flex: 1; background: var(--bg-surface-2); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">Total Tagihan:</span>
+                <strong id="manual-grand-total" style="font-size: 1.2rem; color: var(--primary);">Rp 0</strong>
+              </div>
+              <div id="manual-change-row" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 6px;">
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">Kembalian:</span>
+                <strong id="manual-cash-change" style="font-size: 1.05rem; color: var(--blue);">Rp 0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris 5: Catatan Struk / Garansi -->
+        <div class="form-group">
+          <label style="font-size: 0.76rem;">Catatan Khusus / Garansi Struk (Dicetak di Bagian Bawah Struk)</label>
+          <input type="text" class="form-control" id="manual-rcpt-notes" placeholder="Contoh: Garansi servis 7 hari. Nota jangan sampai hilang.">
+        </div>
+
+        <!-- Baris 6: Opsi Catat ke Pembukuan Toko -->
+        <label class="bookkeeping-toggle-card">
+          <input type="checkbox" id="manual-record-bookkeeping" checked>
+          <div class="toggle-info">
+            <strong>📥 Catat Otomatis ke Pembukuan &amp; Kas Toko (Omset &amp; Laci)</strong>
+            <span>
+              Bila dicentang, total pembayaran otomatis masuk ke omset laporan dan kas laci (bila Tunai).<br>
+              <i>Hilangkan centang jika struk ini <b>hanya untuk dicetak / dikirim ke pelanggan</b> tanpa mempengaruhi laporan keuangan toko.</i>
+            </span>
+          </div>
+        </label>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" id="btn-manual-share-wa" style="font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <span>Kirim WhatsApp</span>
+          </button>
+          <button class="btn btn-primary" id="btn-manual-print" style="font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Cetak Struk (58mm)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 13: Catat Pengeluaran Operasional Konter (Uang Keluar dari Laci) -->
+  <div class="modal-overlay" id="modal-operational-expense">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="display: flex; align-items: center; gap: 8px;">
+            <span>💸</span> Catat Pengeluaran Operasional Toko
+          </h3>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+            Uang tunai diambil langsung dari laci kasir untuk keperluan operasional
+          </p>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- Status Sisa Laci Kasir Banner -->
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1.5px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary); font-weight: 600;">SISA UANG FISIK DI LACI KASIR:</div>
+            <div id="expense-drawer-available" style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">Rp 0</div>
+          </div>
+          <div style="font-size: 0.72rem; color: #ef4444; text-align: right; line-height: 1.3;">
+            ⚠️ Transaksi ini akan<br><b>mengurangi uang laci</b>
+          </div>
+        </div>
+
+        <!-- Pilihan Cepat Kategori Operasional -->
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; display: block; margin-bottom: 6px;">
+            Kategori Pengeluaran Toko:
+          </label>
+          <div class="expense-category-grid" id="expense-category-chips">
+            <button type="button" class="expense-chip-btn active" data-cat="Listrik &amp; Token PLN">⚡ Listrik &amp; Token</button>
+            <button type="button" class="expense-chip-btn" data-cat="Konsumsi &amp; Makan Minum">🍜 Makan &amp; Minum</button>
+            <button type="button" class="expense-chip-btn" data-cat="Bensin &amp; Transport">🛵 Bensin &amp; Transport</button>
+            <button type="button" class="expense-chip-btn" data-cat="ATK &amp; Kertas Thermal">🧾 Kertas Struk &amp; ATK</button>
+            <button type="button" class="expense-chip-btn" data-cat="Internet &amp; Wifi Toko">🌐 Internet &amp; Wifi</button>
+            <button type="button" class="expense-chip-btn" data-cat="Kebersihan &amp; Keamanan">🧹 Iuran &amp; Kebersihan</button>
+            <button type="button" class="expense-chip-btn" data-cat="Maintenance &amp; Servis Alat">🛠️ Perbaikan Alat</button>
+            <button type="button" class="expense-chip-btn" data-cat="Lain-lain">📦 Lainnya</button>
+          </div>
+          <input type="hidden" id="expense-category-val" value="Listrik &amp; Token PLN">
+        </div>
+
+        <!-- Nominal Pengeluaran -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 0.8rem;">Nominal Uang Keluar dari Laci (Rp)</label>
+          <input type="number" class="form-control" id="expense-amount-input" placeholder="Contoh: 50000" style="font-size: 1.25rem; font-weight: 800; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
+          
+          <!-- Pilihan Cepat Nominal -->
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+            <button type="button" class="btn btn-secondary btn-sm btn-expense-preset" data-amount="5000">5rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-expense-preset" data-amount="10000">10rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-expense-preset" data-amount="20000">20rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-expense-preset" data-amount="50000">50rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-expense-preset" data-amount="100000">100rb</button>
+            <button type="button" class="btn btn-secondary btn-sm btn-expense-preset" data-amount="200000">200rb</button>
+          </div>
+        </div>
+
+        <!-- Rincian Keterangan Pengeluaran -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 0.8rem;">Keterangan / Rincian Belanja (Wajib)</label>
+          <input type="text" class="form-control" id="expense-notes-input" placeholder="Contoh: Beli token PLN konter / Beli kertas thermal 5 roll">
+        </div>
+
+        <!-- Toko Tujuan / Penerima & Petugas -->
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 0.76rem;">Penerima / Beli Di (Opsional)</label>
+            <input type="text" class="form-control" id="expense-recipient-input" placeholder="Contoh: Toko Sejahtera / PLN">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 0.76rem;">Kasir / Petugas</label>
+            <input type="text" class="form-control" id="expense-cashier-input" readonly style="font-weight: 600;">
+          </div>
+        </div>
+
+        <!-- Preview Struk / Checkbox Cetak -->
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text-secondary); margin-top: 4px;">
+          <input type="checkbox" id="expense-print-receipt" checked style="accent-color: var(--primary); width: 16px; height: 16px;">
+          <span>Cetak Bukti Kas Keluar (Thermal 58mm untuk arsip nota di laci)</span>
+        </label>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-danger" id="btn-confirm-expense" style="font-weight: 700; padding: 10px 18px; display: flex; align-items: center; gap: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Keluarkan Uang dari Laci</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 13B: Catat Pemasukan & Belanja Operasional (Admin Only) -->
+  <div class="modal-overlay" id="modal-operational-record">
+    <div class="modal-content" style="max-width: 540px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="op-modal-icon" style="font-size: 1.4rem;">💰</span>
+          <div>
+            <h3 id="op-modal-title" style="margin: 0; font-size: 1.1rem;">Catat Transaksi Operasional</h3>
+            <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">Khusus Admin: Catat uang modal masuk &amp; belanja toko</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <input type="hidden" id="op-form-id" value="">
+        <input type="hidden" id="op-form-type" value="expense">
+
+        <!-- Toggle Jenis Transaksi (Segmented) -->
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; display: block;">Jenis Transaksi Operasional</label>
+          <div class="op-type-toggle-group">
+            <button type="button" class="op-type-toggle-btn income" id="op-toggle-income">
+              <span>🟢 Pemasukan Operasional (Kas Masuk)</span>
+            </button>
+            <button type="button" class="op-type-toggle-btn expense active" id="op-toggle-expense">
+              <span>🔴 Pengeluaran Belanja (Kas Keluar)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tanggal & Jam Masuk / Keluar -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between;">
+            <span id="op-label-datetime">📅 Tanggal &amp; Jam Keluar (Belanja):</span>
+            <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 400;">Bisa dipilih jika belanja kemarin</span>
+          </label>
+          <input type="datetime-local" class="form-control" id="op-form-datetime" style="font-size: 0.9rem; font-weight: 600;">
+        </div>
+
+        <!-- Kategori -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Kategori Pos Operasional</label>
+          <select class="form-control" id="op-form-category" style="font-size: 0.88rem; font-weight: 600;">
+            <!-- Populated dynamically based on income vs expense -->
+          </select>
+          <div id="op-form-chips-container" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+            <!-- Quick Chips -->
+          </div>
+        </div>
+
+        <!-- Nominal Uang -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Nominal Uang (Rp)</label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--text-muted);">Rp</span>
+            <input type="number" class="form-control" id="op-form-amount" placeholder="0" style="padding-left: 40px; font-size: 1.15rem; font-weight: 800;">
+          </div>
+          <div id="op-form-amount-preview" style="font-size: 0.82rem; font-weight: 700; color: #ef4444; margin-top: 4px;">Rp 0</div>
+          <!-- Presets -->
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+            <button type="button" class="op-preset-btn" data-op-amt="20000">+20rb</button>
+            <button type="button" class="op-preset-btn" data-op-amt="50000">+50rb</button>
+            <button type="button" class="op-preset-btn" data-op-amt="100000">+100rb</button>
+            <button type="button" class="op-preset-btn" data-op-amt="200000">+200rb</button>
+            <button type="button" class="op-preset-btn" data-op-amt="500000">+500rb</button>
+            <button type="button" class="op-preset-btn" data-op-amt="1000000">+1 Jt</button>
+            <button type="button" class="op-preset-btn" data-op-amt="2000000">+2 Jt</button>
+          </div>
+        </div>
+
+        <!-- Sumber Kas / Metode Pembayaran -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Sumber Dana / Rekening</label>
+          <select class="form-control" id="op-form-source">
+            <option value="Kas Laci Toko">💵 Kas Laci Toko (Uang Tunai Kasir)</option>
+            <option value="Transfer Bank Admin">🏦 Transfer Bank / Rekening Admin (BCA/BRI/Mandiri)</option>
+            <option value="Uang Pribadi Admin">💼 Uang Pribadi Pemilik Toko (Di luar laci)</option>
+            <option value="E-Wallet Toko">📱 E-Wallet Toko (DANA / OVO / GoPay)</option>
+            <option value="Lainnya">📝 Sumber Lainnya</option>
+          </select>
+        </div>
+
+        <!-- Keterangan / Keperluan Belanja -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);" id="op-label-notes">
+            Keterangan / Keperluan Belanja <span style="color: #ef4444;">*</span>
+          </label>
+          <textarea class="form-control" id="op-form-notes" rows="2" placeholder="Contoh: Beli voucher fisik Indosat di grosir 50 pcs, bayar token PLN konter, beli kertas struk 10 roll..."></textarea>
+        </div>
+
+        <!-- Toko Tujuan / Pihak Terkait (Opsional) -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);">Toko Tujuan / Penerima / Sumber (Opsional)</label>
+          <input type="text" class="form-control" id="op-form-recipient" placeholder="Contoh: Grosir Berkah Jaya, PLN, Toko Plastik 88">
+        </div>
+
+        <!-- Sinkronisasi Laci -->
+        <div id="op-form-drawer-sync-row" style="background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.25); border-radius: var(--radius-sm); padding: 10px 12px;">
+          <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.78rem; cursor: pointer; color: var(--text-main); margin: 0;">
+            <input type="checkbox" id="op-form-sync-drawer" checked style="accent-color: var(--primary); width: 16px; height: 16px; margin-top: 2px;">
+            <span>
+              <b>Sinkronkan dengan Uang Fisik Laci Kasir</b><br>
+              <span style="font-size: 0.72rem; color: var(--text-secondary);">Jika dicentang dan sumbernya "Kas Laci Toko", uang kas di laci kasir otomatis ikut terpotong/bertambah secara rapi.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn btn-secondary" data-close-modal>Batal</button>
+        <button class="btn btn-primary" id="btn-save-op-record" style="font-weight: 700; padding: 10px 20px;">
+          <span>Simpan Catatan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 13C: Cetak Rekapan Kas Operasional Bulanan -->
+  <div class="modal-overlay" id="modal-op-print">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0; font-size: 1.1rem;">🖨️ Cetak Rekapitulasi Kas Operasional</h3>
+          <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">Pratinjau laporan pembukuan operasional bulanan</p>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px; background: #ffffff; color: #111827; border-radius: 8px;" id="op-print-content">
+        <div style="text-align: center; border-bottom: 2px solid #111827; padding-bottom: 12px; margin-bottom: 16px;">
+          <h2 style="margin: 0; font-size: 1.3rem; font-weight: 900; letter-spacing: 1px;">IZDIIHAR CELL</h2>
+          <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #4b5563;">Kasir, Paket Data, Voucher, Aksesoris &amp; Layanan Digital</p>
+          <h3 style="margin: 10px 0 0 0; font-size: 1rem; font-weight: 800; color: #0284c7;" id="op-print-period-title">REKAPITULASI KAS &amp; BELANJA OPERASIONAL - BULAN OKTOBER 2026</h3>
+          <p style="margin: 2px 0 0 0; font-size: 0.72rem; color: #6b7280;" id="op-print-meta-info">Dicetak pada: - oleh: Admin</p>
+        </div>
+
+        <!-- Print Summary Stats -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+          <div style="border: 1px solid #10b981; border-radius: 6px; padding: 8px 12px; text-align: center; background: #ecfdf5;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #065f46;">TOTAL PEMASUKAN</div>
+            <div style="font-size: 1rem; font-weight: 800; color: #059669;" id="op-print-total-income">Rp 0</div>
+          </div>
+          <div style="border: 1px solid #ef4444; border-radius: 6px; padding: 8px 12px; text-align: center; background: #fef2f2;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #991b1b;">TOTAL PENGELUARAN BELANJA</div>
+            <div style="font-size: 1rem; font-weight: 800; color: #dc2626;" id="op-print-total-expense">Rp 0</div>
+          </div>
+          <div style="border: 1px solid #0284c7; border-radius: 6px; padding: 8px 12px; text-align: center; background: #f0f9ff;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #075985;">SALDO BERSIH OPERASIONAL</div>
+            <div style="font-size: 1rem; font-weight: 800; color: #0284c7;" id="op-print-net-balance">Rp 0</div>
+          </div>
+        </div>
+
+        <!-- Print Table Container -->
+        <div style="margin-bottom: 20px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem;">
+            <thead>
+              <tr style="background: #f3f4f6; border-bottom: 1.5px solid #d1d5db;">
+                <th style="padding: 6px 8px; text-align: left; border: 1px solid #e5e7eb;">No.</th>
+                <th style="padding: 6px 8px; text-align: left; border: 1px solid #e5e7eb;">Tanggal</th>
+                <th style="padding: 6px 8px; text-align: left; border: 1px solid #e5e7eb;">Jenis</th>
+                <th style="padding: 6px 8px; text-align: left; border: 1px solid #e5e7eb;">Kategori</th>
+                <th style="padding: 6px 8px; text-align: left; border: 1px solid #e5e7eb;">Keterangan Belanja</th>
+                <th style="padding: 6px 8px; text-align: right; border: 1px solid #e5e7eb;">Nominal</th>
+              </tr>
+            </thead>
+            <tbody id="op-print-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Signatures -->
+        <div style="display: flex; justify-content: space-between; margin-top: 30px; padding: 0 30px;">
+          <div style="text-align: center;">
+            <div style="font-size: 0.76rem; color: #4b5563;">Mengetahui,</div>
+            <div style="font-size: 0.8rem; font-weight: 700; margin-top: 4px;">Pemilik Toko (Admin)</div>
+            <div style="height: 50px;"></div>
+            <div style="font-size: 0.8rem; font-weight: 700; border-top: 1px solid #9ca3af; padding-top: 4px;">( .................................... )</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 0.76rem; color: #4b5563;">Dibuat Oleh,</div>
+            <div style="font-size: 0.8rem; font-weight: 700; margin-top: 4px;">Kasir / Pengelola Toko</div>
+            <div style="height: 50px;"></div>
+            <div style="font-size: 0.8rem; font-weight: 700; border-top: 1px solid #9ca3af; padding-top: 4px;">( .................................... )</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button class="btn btn-secondary" data-close-modal>Tutup</button>
+        <button class="btn btn-primary" id="btn-do-print-op" style="font-weight: 700; display: flex; align-items: center; gap: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span>Cetak Sekarang (Print / PDF)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 14: Pengaturan Supabase Cloud Database (Online 24 Jam) -->
+  <div class="modal-overlay" id="modal-supabase-config">
+    <div class="modal-content" style="max-width: 530px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="display: flex; align-items: center; gap: 8px;">
+            <span>⚡</span> Pengaturan Cloud Database (Supabase)
+          </h3>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+            Database online 24 jam real-time: Kasir bisa akses dari HP di mana saja
+          </p>
+        </div>
+        <button class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- Status Banner -->
+        <div id="supabase-status-banner" style="background: rgba(14, 165, 233, 0.08); border: 1.5px solid rgba(14, 165, 233, 0.3); border-radius: var(--radius-md); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="supabase-indicator-dot" style="width: 12px; height: 12px; border-radius: 50%; background: var(--primary); display: inline-block;"></span>
+            <div>
+              <div id="supabase-status-title" style="font-size: 0.86rem; font-weight: 700; color: var(--text-primary);">Status: Mode Server Lokal</div>
+              <div id="supabase-status-desc" style="font-size: 0.74rem; color: var(--text-secondary);">Data tersimpan di laptop toko (database.json)</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-test-supabase">Tes Koneksi</button>
+        </div>
+
+        <div style="background: rgba(59, 130, 246, 0.08); border-left: 3px solid #3b82f6; padding: 10px 12px; font-size: 0.76rem; color: var(--text-secondary); line-height: 1.45;">
+          💡 <b>Cara Cepat Mendapatkan Kunci Supabase (100% Gratis):</b><br>
+          1. Buka <b>supabase.com</b> &gt; Daftar akun gratis &gt; Buat project baru (misal: <code>izdiihar-cell</code>).<br>
+          2. Buka menu <b>SQL Editor</b> di Supabase &gt; Paste isi file <code>supabase_schema.sql</code> &gt; Klik <b>Run</b>.<br>
+          3. Buka menu <b>Project Settings &gt; API</b> di Supabase &gt; Salin <b>Project URL</b> dan <b>anon / public key</b> ke bawah ini.
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 0.8rem;">Supabase Project URL</label>
+          <input type="text" class="form-control" id="supabase-url-input" placeholder="https://xxxxxxxxxxxx.supabase.co">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label style="font-weight: 700; font-size: 0.8rem;">Supabase Anon / Public API Key</label>
+          <input type="password" class="form-control" id="supabase-key-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          <small style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 4px;">Kunci aman level browser (anon/public key).</small>
+        </div>
+
+        <!-- Tombol Migrasi Data Lokal ke Cloud -->
+        <div style="border-top: 1px dashed var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 0.78rem; font-weight: 700;">Alat Sinkronisasi &amp; Migrasi:</div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-push-local-to-cloud" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>☁️ Unggah Data Toko Saat Ini (Produk &amp; Riwayat) ke Supabase Cloud</span>
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-pull-cloud-to-local" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>📥 Unduh &amp; Perbarui Data dari Cloud ke Laptop Ini</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button type="button" class="btn btn-danger btn-sm" id="btn-disconnect-supabase">Putuskan Cloud (Kembali ke Lokal)</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" data-close-modal>Tutup</button>
+          <button class="btn btn-primary" id="btn-save-supabase-config" style="font-weight: 700;">Simpan &amp; Hubungkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
